@@ -17,7 +17,7 @@ def on_startup() -> None:
 
 
 def _include_routers() -> None:
-    from app.routes import profile, criteria, jobs, contacts, cv, tailoring, salary, help as help_route
+    from app.routes import profile, criteria, jobs, contacts, cv, tailoring, salary, apollo, help as help_route
 
     app.include_router(profile.router)
     app.include_router(criteria.router)
@@ -26,6 +26,7 @@ def _include_routers() -> None:
     app.include_router(cv.router)
     app.include_router(tailoring.router)
     app.include_router(salary.router)
+    app.include_router(apollo.router)
     app.include_router(help_route.router)
 
 

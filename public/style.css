@@ -264,6 +264,19 @@ button:hover, .secondary-btn:hover { background: var(--chip-bg); }
 .badge-warning { background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); }
 .badge-fail { background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
 
+.apollo-postings-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.4rem; }
+
+.apollo-posting-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.4rem;
+}
+
+.apollo-posting-title { flex: 1; }
+
 .export-steps {
   margin-bottom: 0.85rem;
   font-size: 0.85rem;

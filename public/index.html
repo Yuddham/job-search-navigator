@@ -236,6 +236,14 @@
       </div>
       <div id="tailoringDownloads"></div>
     </div>
+
+    <div class="panel">
+      <h2>Similar companies &amp; positions</h2>
+      <p class="panel-hint">Uses the selected target job's company/location (via Apollo's company-search and job-postings data -- no contact/people data touched) to suggest similar companies and their open roles.</p>
+      <button id="findSimilarCompaniesBtn">Find similar companies</button>
+      <div id="similarCompaniesStatus" class="status"></div>
+      <div id="similarCompaniesList" class="card-grid"></div>
+    </div>
   </section>
 
   <!-- Salary Insights -->
@@ -358,6 +366,25 @@
     </div>
     <div class="target-job-meta"></div>
     <p class="target-job-warning"></p>
+  </div>
+</template>
+
+<template id="apolloCompanyCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="apollo-company-name"></h3>
+    </div>
+    <div class="apollo-company-meta"></div>
+    <button class="view-postings-btn secondary-btn">View job postings</button>
+    <div class="apollo-postings-list"></div>
+  </div>
+</template>
+
+<template id="apolloPostingItemTemplate">
+  <div class="apollo-posting-item">
+    <span class="apollo-posting-title"></span>
+    <a class="apollo-posting-link" target="_blank" rel="noopener">Open</a>
+    <button class="add-as-listing-btn secondary-btn">Add as listing</button>
   </div>
 </template>
 

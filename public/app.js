@@ -822,6 +822,94 @@
     showTailoringReport(report);
   }
 
+  // ---- Similar Companies & Positions (Apollo: company + job-postings data only) ----
+
+  document.getElementById("findSimilarCompaniesBtn").addEventListener("click", async () => {
+    const jobId = document.getElementById("tailorJobSelect").value;
+    const statusEl = document.getElementById("similarCompaniesStatus");
+    const listEl = document.getElementById("similarCompaniesList");
+    listEl.innerHTML = "";
+    if (!jobId) {
+      statusEl.textContent = "Add/select a target job first.";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = "Searching…";
+    statusEl.className = "status";
+    try {
+      const job = await api(`/api/target-jobs/${jobId}`);
+      const keyword = job.company || job.title || "";
+      const location = job.location || "";
+      const resp = await api(
+        `/api/apollo/similar-companies?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`
+      );
+      if (resp.warning) {
+        statusEl.textContent = resp.warning;
+        statusEl.className = "status error";
+      } else {
+        statusEl.textContent = `Found ${resp.companies.length} compan${resp.companies.length === 1 ? "y" : "ies"}.`;
+      }
+      const tpl = document.getElementById("apolloCompanyCardTemplate");
+      resp.companies.forEach((c) => {
+        const node = tpl.content.cloneNode(true);
+        node.querySelector(".apollo-company-name").textContent = c.name || "(unnamed company)";
+        node.querySelector(".apollo-company-meta").textContent = [
+          c.industry,
+          c.location,
+          c.employee_count ? `${c.employee_count} employees` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        const postingsList = node.querySelector(".apollo-postings-list");
+        node.querySelector(".view-postings-btn").addEventListener("click", async (evt) => {
+          evt.target.textContent = "Loading…";
+          try {
+            const postingsResp = await api(`/api/apollo/job-postings?organization_id=${encodeURIComponent(c.id)}`);
+            postingsList.innerHTML = "";
+            if (postingsResp.warning) {
+              postingsList.innerHTML = `<p class="status error">${escapeHtml(postingsResp.warning)}</p>`;
+            } else if (!postingsResp.postings.length) {
+              postingsList.innerHTML = '<p class="status">No open postings found via Apollo for this company.</p>';
+            } else {
+              const itemTpl = document.getElementById("apolloPostingItemTemplate");
+              postingsResp.postings.forEach((p) => {
+                const item = itemTpl.content.cloneNode(true);
+                item.querySelector(".apollo-posting-title").textContent = p.title || "(untitled role)";
+                const link = item.querySelector(".apollo-posting-link");
+                if (p.url) {
+                  link.href = p.url;
+                } else {
+                  link.remove();
+                }
+                item.querySelector(".add-as-listing-btn").addEventListener("click", async () => {
+                  await api("/api/jobs/manual", {
+                    method: "POST",
+                    body: {
+                      title: p.title || "",
+                      company: c.name || "",
+                      location: p.location || "",
+                      url: p.url || "",
+                      description: "",
+                      notes: "Added from Apollo similar-companies search",
+                    },
+                  });
+                  window.alert("Added to Manual Listings.");
+                });
+                postingsList.appendChild(item);
+              });
+            }
+          } finally {
+            evt.target.textContent = "View job postings";
+          }
+        });
+        listEl.appendChild(node);
+      });
+    } catch (err) {
+      statusEl.textContent = "Search failed: " + err.message;
+      statusEl.className = "status error";
+    }
+  });
+
   // ---- Salary Insights ----
 
   document.getElementById("runSalaryEstimateBtn").addEventListener("click", async () => {

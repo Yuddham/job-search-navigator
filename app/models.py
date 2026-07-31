@@ -249,6 +249,35 @@ class GenerateTailoredIn(BaseModel):
     format: Literal["markdown", "docx"]
 
 
+# ---- Apollo (company/job-postings only) ----
+
+class ApolloCompany(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+    website_url: Optional[str] = None
+    industry: Optional[str] = None
+    location: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    employee_count: Optional[int] = None
+
+
+class ApolloCompaniesResponse(BaseModel):
+    companies: list[ApolloCompany] = []
+    warning: Optional[str] = None
+
+
+class ApolloJobPosting(BaseModel):
+    title: Optional[str] = None
+    url: Optional[str] = None
+    location: Optional[str] = None
+    posted_at: Optional[str] = None
+
+
+class ApolloJobPostingsResponse(BaseModel):
+    postings: list[ApolloJobPosting] = []
+    warning: Optional[str] = None
+
+
 # ---- Salary ----
 
 class SalaryEstimateOut(BaseModel):

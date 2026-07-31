@@ -14,6 +14,7 @@ def _resolve(path_str: str) -> Path:
 
 ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "").strip()
 ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "").strip()
+APOLLO_API_KEY = os.environ.get("APOLLO_API_KEY", "").strip()
 
 PORT = int(os.environ.get("PORT", "8000"))
 DB_PATH = _resolve(os.environ.get("DB_PATH", "./data/job_search.db"))
@@ -39,6 +40,7 @@ INHAND_DEDUCTION_PCT_HIGH = float(os.environ.get("INHAND_DEDUCTION_PCT_HIGH", "0
 SALARY_MIN_HISTOGRAM_BUCKETS = 3
 
 ADZUNA_CACHE_TTL_SECONDS = 600
+APOLLO_CACHE_TTL_SECONDS = 600
 
 
 def ensure_data_dirs() -> None:

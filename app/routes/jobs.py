@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app import db, linkedin_export, matching
 from app.models import JobSearchResponse, ManualListingIn, ManualListingOut, RankedListing
-from app.sources import adzuna_source, manual_source
+from app.sources import adzuna_source, apollo_source, manual_source
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
@@ -35,7 +35,7 @@ def search_jobs(
         all_listings: list[dict] = []
         warnings: list[str] = []
 
-        for source in (adzuna_source, manual_source):
+        for source in (adzuna_source, apollo_source, manual_source):
             listings, source_warnings = source.fetch(conn, criteria)
             all_listings.extend(listings)
             warnings.extend(source_warnings)
