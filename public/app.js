@@ -303,6 +303,34 @@
 
   document.getElementById("cancelListingEditBtn").addEventListener("click", resetListingForm);
 
+  document.getElementById("fetchListingUrlBtn").addEventListener("click", async () => {
+    const url = val("listingUrl");
+    const statusEl = document.getElementById("listingFetchStatus");
+    if (!url) {
+      statusEl.textContent = "Paste a URL first.";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = "Fetching…";
+    statusEl.className = "status";
+    try {
+      const preview = await api("/api/fetch-url-preview", { method: "POST", body: { url } });
+      if (preview.status === "ok") {
+        if (preview.title) document.getElementById("listingTitle").value = preview.title;
+        if (preview.company) document.getElementById("listingCompany").value = preview.company;
+        if (preview.location) document.getElementById("listingLocation").value = preview.location;
+        if (preview.jd_text) document.getElementById("listingDescription").value = preview.jd_text;
+        statusEl.textContent = "Auto-filled from the page. Review before saving.";
+      } else {
+        statusEl.textContent = preview.warning || "Couldn't fetch this page -- fill in the fields manually.";
+        statusEl.className = "status error";
+      }
+    } catch (err) {
+      statusEl.textContent = "Fetch failed: " + err.message;
+      statusEl.className = "status error";
+    }
+  });
+
   document.getElementById("manualListingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const statusEl = document.getElementById("manualListingStatus");
@@ -470,6 +498,33 @@
   }
 
   document.getElementById("cancelLeadEditBtn").addEventListener("click", resetLeadForm);
+
+  document.getElementById("fetchLeadUrlBtn").addEventListener("click", async () => {
+    const url = val("leadJobUrl");
+    const statusEl = document.getElementById("leadFetchStatus");
+    if (!url) {
+      statusEl.textContent = "Paste a URL first.";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = "Fetching…";
+    statusEl.className = "status";
+    try {
+      const preview = await api("/api/fetch-url-preview", { method: "POST", body: { url } });
+      if (preview.status === "ok") {
+        if (preview.company) document.getElementById("leadCompany").value = preview.company;
+        statusEl.textContent = preview.company
+          ? "Auto-filled company. Recruiter name usually isn't in the posting -- add it manually if you know it."
+          : "Fetched the page but couldn't identify a company -- fill in manually.";
+      } else {
+        statusEl.textContent = preview.warning || "Couldn't fetch this page -- fill in the fields manually.";
+        statusEl.className = "status error";
+      }
+    } catch (err) {
+      statusEl.textContent = "Fetch failed: " + err.message;
+      statusEl.className = "status error";
+    }
+  });
 
   document.getElementById("leadForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -772,13 +827,19 @@
   document.getElementById("runSalaryEstimateBtn").addEventListener("click", async () => {
     const what = val("salaryWhat");
     const where = val("salaryWhere");
+    const useExperience = document.getElementById("salaryUseExperience").checked;
     const resultEl = document.getElementById("salaryResult");
     resultEl.textContent = "Estimating…";
     try {
-      const est = await api(`/api/salary/estimate?what=${encodeURIComponent(what)}&where=${encodeURIComponent(where)}`);
+      const est = await api(
+        `/api/salary/estimate?what=${encodeURIComponent(what)}&where=${encodeURIComponent(where)}&use_profile_experience=${useExperience}`
+      );
       let html = "";
       if (est.warning) {
         html += `<p class="status error">${escapeHtml(est.warning)}</p>`;
+      }
+      if (est.role_query && est.role_query !== what) {
+        html += `<p class="listing-meta">Queried as: "${escapeHtml(est.role_query)}" (adjusted using your profile's inferred experience level)</p>`;
       }
       if (est.ctc_low !== null && est.ctc_low !== undefined) {
         html += `<p><strong>CTC range:</strong> ₹${formatINR(est.ctc_low)} – ₹${formatINR(est.ctc_high)} (median ~₹${formatINR(est.ctc_median)})</p>`;

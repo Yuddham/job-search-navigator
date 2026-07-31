@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from app import adzuna_client, config, db, salary_estimator
+from app import adzuna_client, config, db, experience, linkedin_export, salary_estimator
 from app.models import SalaryEstimateOut
 
 router = APIRouter(prefix="/api/salary", tags=["salary"])
@@ -18,13 +18,21 @@ def _row_to_estimate(r) -> SalaryEstimateOut:
 
 
 @router.get("/estimate", response_model=SalaryEstimateOut)
-def get_estimate(what: str = "", where: str = "", target_job_id: Optional[int] = None) -> SalaryEstimateOut:
+def get_estimate(
+    what: str = "", where: str = "", target_job_id: Optional[int] = None, use_profile_experience: bool = True,
+) -> SalaryEstimateOut:
     with db.get_db() as conn:
         if target_job_id is not None:
             job = conn.execute("SELECT * FROM target_jobs WHERE id = ?", (target_job_id,)).fetchone()
             if job:
                 what = what or job["title"] or ""
                 where = where or job["location"] or ""
+
+        if use_profile_experience and what:
+            profile = linkedin_export.load_profile_summary(conn)
+            seniority = experience.infer_seniority_label(profile.get("positions", []))
+            if seniority and seniority.lower() not in what.lower():
+                what = f"{seniority} {what}"
 
         result = salary_estimator.estimate_salary(what, where)
         now = datetime.now(timezone.utc).isoformat()

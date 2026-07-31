@@ -178,6 +178,19 @@ class CvUploadResponse(BaseModel):
 
 # ---- Target jobs / tailoring ----
 
+class UrlPreviewIn(BaseModel):
+    url: str
+
+
+class UrlPreviewOut(BaseModel):
+    status: str
+    title: Optional[str] = None
+    company: Optional[str] = None
+    location: Optional[str] = None
+    jd_text: Optional[str] = None
+    warning: Optional[str] = None
+
+
 class TargetJobFetchIn(BaseModel):
     url: str
 

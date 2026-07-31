@@ -15,6 +15,8 @@ from app.models import (
     TargetJobFetchIn,
     TargetJobManualIn,
     TargetJobOut,
+    UrlPreviewIn,
+    UrlPreviewOut,
 )
 
 router = APIRouter(prefix="/api", tags=["tailoring"])
@@ -27,6 +29,16 @@ def _row_to_target_job(r) -> TargetJobOut:
         company=r["company"], title=r["title"], location=r["location"],
         jd_text=r["jd_text"], fetched_at=r["fetched_at"],
     )
+
+
+@router.post("/fetch-url-preview", response_model=UrlPreviewOut)
+def fetch_url_preview(payload: UrlPreviewIn) -> UrlPreviewOut:
+    """Same single-GET job_fetch mechanism as target-jobs/fetch-url, but
+    preview-only (nothing persisted) -- used by forms (Manual Listings, Job
+    Leads) that want to auto-fill their own fields from a pasted job-posting
+    URL without also creating a target_jobs row as a side effect."""
+    result = job_fetch.fetch_job_posting(payload.url)
+    return UrlPreviewOut(**result)
 
 
 @router.post("/target-jobs/fetch-url", response_model=TargetJobOut)

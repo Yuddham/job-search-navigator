@@ -28,7 +28,17 @@
   <section id="profile" class="view active">
     <div class="panel">
       <h2>LinkedIn profile</h2>
-      <p class="panel-hint">Upload the .zip from LinkedIn's "Download your data" export. See the Help tab for exactly which boxes to check.</p>
+      <details class="export-steps">
+        <summary>How to export your LinkedIn data (click to expand)</summary>
+        <ol>
+          <li>On LinkedIn, go to <strong>Settings &amp; Privacy → Data privacy → Get a copy of your data</strong>.</li>
+          <li>Choose <strong>"Want something in particular?"</strong> and check at least: <strong>Profile</strong>, <strong>Positions</strong>, <strong>Education</strong>, <strong>Skills</strong>, and <strong>Certifications</strong> (checking more is fine — only these are read).</li>
+          <li>Click <strong>Request archive</strong>. LinkedIn emails you a download link once it's ready (usually minutes to a few hours).</li>
+          <li>Download the <code>.zip</code> from that email link -- don't unzip it.</li>
+          <li>Choose that file below and click <strong>Upload</strong>.</li>
+        </ol>
+      </details>
+      <p class="panel-hint">Upload the .zip from LinkedIn's "Download your data" export.</p>
       <form id="profileUploadForm" class="inline-form">
         <input type="file" id="profileZipInput" accept=".zip" required />
         <button type="submit">Upload</button>
@@ -90,10 +100,14 @@
       <h2>Add a listing</h2>
       <p class="panel-hint">Paste in a listing you found on Naukri, Indeed, LinkedIn, or anywhere else -- it will be included in Job Search ranking.</p>
       <form id="manualListingForm" class="stacked-form">
+        <div class="inline-form">
+          <input type="url" id="listingUrl" placeholder="Paste a job posting URL (optional) to auto-fill fields below" />
+          <button type="button" id="fetchListingUrlBtn">Fetch &amp; auto-fill</button>
+        </div>
+        <div id="listingFetchStatus" class="status"></div>
         <input type="text" id="listingTitle" placeholder="Title" required />
         <input type="text" id="listingCompany" placeholder="Company" />
         <input type="text" id="listingLocation" placeholder="Location" />
-        <input type="url" id="listingUrl" placeholder="URL" />
         <textarea id="listingDescription" rows="3" placeholder="Description"></textarea>
         <textarea id="listingNotes" rows="2" placeholder="Notes"></textarea>
         <div class="inline-form">
@@ -135,7 +149,11 @@
           <h2>Add job lead</h2>
           <p class="panel-hint">Log a job posting (e.g. from LinkedIn) you found by browsing manually.</p>
           <form id="leadForm" class="stacked-form">
-            <input type="url" id="leadJobUrl" placeholder="Job posting URL" />
+            <div class="inline-form">
+              <input type="url" id="leadJobUrl" placeholder="Paste job posting URL (auto-fills company)" />
+              <button type="button" id="fetchLeadUrlBtn">Fetch &amp; auto-fill</button>
+            </div>
+            <div id="leadFetchStatus" class="status"></div>
             <input type="text" id="leadCompany" placeholder="Company" />
             <input type="text" id="leadRecruiterName" placeholder="Recruiter name (if mentioned)" />
             <select id="leadContactSelect"></select>
@@ -229,6 +247,7 @@
         <input type="text" id="salaryWhere" placeholder="Location, e.g. Bangalore" />
         <button id="runSalaryEstimateBtn">Estimate</button>
       </div>
+      <label class="panel-hint"><input type="checkbox" id="salaryUseExperience" checked /> Factor in my experience level from my uploaded LinkedIn profile (adds a seniority qualifier like "senior"/"entry level" to the query, inferred from your career span)</label>
       <div id="salaryResult"></div>
     </div>
     <div class="panel">
