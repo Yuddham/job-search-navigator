@@ -96,7 +96,8 @@
       const result = await api("/api/profile/upload", { method: "POST", body: formData });
       statusEl.textContent =
         `Imported ${result.counts.positions} position(s), ${result.counts.education} education, ` +
-        `${result.counts.skills} skill(s), ${result.counts.certifications} certification(s).` +
+        `${result.counts.skills} skill(s), ${result.counts.certifications} certification(s), ` +
+        `${result.counts.projects} project(s).` +
         (result.warnings.length ? " Warnings: " + result.warnings.join(" ") : "");
       renderProfile(result.summary);
     } catch (err) {
@@ -159,6 +160,25 @@
       const li = document.createElement("li");
       li.textContent = `${c.name || ""}${c.authority ? " – " + c.authority : ""}`;
       certEl.appendChild(li);
+    });
+
+    const projectsEl = document.getElementById("profileProjects");
+    projectsEl.innerHTML = "";
+    (summary.projects || []).forEach((p) => {
+      const li = document.createElement("li");
+      let text = p.title || "";
+      if (p.started_on || p.finished_on) text += ` (${p.started_on || "?"} – ${p.finished_on || "?"})`;
+      if (p.description) text += `: ${p.description}`;
+      li.textContent = text;
+      if (p.url) {
+        const link = document.createElement("a");
+        link.href = p.url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = " [link]";
+        li.appendChild(link);
+      }
+      projectsEl.appendChild(li);
     });
   }
 

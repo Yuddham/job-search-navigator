@@ -37,12 +37,22 @@ class ProfileCertification(BaseModel):
     url: Optional[str] = None
 
 
+class ProfileProject(BaseModel):
+    id: int
+    title: Optional[str] = None
+    description: Optional[str] = None
+    url: Optional[str] = None
+    started_on: Optional[str] = None
+    finished_on: Optional[str] = None
+
+
 class ProfileSummary(BaseModel):
     basics: Optional[dict[str, Any]] = None
     positions: list[ProfilePosition] = []
     education: list[ProfileEducation] = []
     skills: list[str] = []
     certifications: list[ProfileCertification] = []
+    projects: list[ProfileProject] = []
     warnings: list[str] = []
 
 

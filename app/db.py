@@ -53,6 +53,16 @@ CREATE TABLE IF NOT EXISTS profile_certifications (
     raw_json TEXT
 );
 
+CREATE TABLE IF NOT EXISTS profile_projects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    description TEXT,
+    url TEXT,
+    started_on TEXT,
+    finished_on TEXT,
+    raw_json TEXT
+);
+
 CREATE TABLE IF NOT EXISTS search_criteria (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label TEXT NOT NULL,

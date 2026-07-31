@@ -12,6 +12,7 @@ FILE_ALIASES = {
     "education": ["Education.csv"],
     "skills": ["Skills.csv"],
     "certifications": ["Certifications.csv", "Certification.csv"],
+    "projects": ["Projects.csv", "Project.csv"],
 }
 
 COLUMN_ALIASES = {
@@ -48,6 +49,13 @@ COLUMN_ALIASES = {
         "finished_on": ["Finished On", "End Date"],
         "license_number": ["License Number"],
         "url": ["Url", "URL"],
+    },
+    "projects": {
+        "title": ["Title", "Project Name", "Name"],
+        "description": ["Description"],
+        "url": ["Url", "URL"],
+        "started_on": ["Started On", "Start Date"],
+        "finished_on": ["Finished On", "End Date"],
     },
 }
 
@@ -99,6 +107,7 @@ def parse_export(zip_bytes: bytes) -> dict[str, Any]:
         "education": [],
         "skills": [],
         "certifications": [],
+        "projects": [],
         "warnings": warnings,
     }
 
@@ -156,6 +165,15 @@ def parse_export(zip_bytes: bytes) -> dict[str, Any]:
     else:
         warnings.append("Certifications.csv not found — certifications not imported.")
 
+    projects_file = _find_file(name_map, FILE_ALIASES["projects"])
+    if projects_file:
+        for row in _read_rows(zf, projects_file, warnings):
+            mapped = _map_row(row, COLUMN_ALIASES["projects"])
+            if mapped.get("title"):
+                result["projects"].append(mapped)
+    else:
+        warnings.append("Projects.csv not found — projects not imported.")
+
     return result
 
 
@@ -170,6 +188,7 @@ def save_profile(conn: sqlite3.Connection, parsed: dict[str, Any]) -> dict[str, 
     cur.execute("DELETE FROM profile_education")
     cur.execute("DELETE FROM profile_skills")
     cur.execute("DELETE FROM profile_certifications")
+    cur.execute("DELETE FROM profile_projects")
 
     basics = parsed.get("basics") or {}
     cur.execute(
@@ -208,6 +227,14 @@ def save_profile(conn: sqlite3.Connection, parsed: dict[str, Any]) -> dict[str, 
              c.get("license_number"), c.get("url"), c.get("raw_json")),
         )
 
+    for p in parsed.get("projects", []):
+        cur.execute(
+            "INSERT INTO profile_projects (title, description, url, started_on, finished_on, raw_json) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (p.get("title"), p.get("description"), p.get("url"),
+             p.get("started_on"), p.get("finished_on"), p.get("raw_json")),
+        )
+
     conn.commit()
 
     return {
@@ -216,6 +243,7 @@ def save_profile(conn: sqlite3.Connection, parsed: dict[str, Any]) -> dict[str, 
             "education": len(parsed.get("education", [])),
             "skills": len(parsed.get("skills", [])),
             "certifications": len(parsed.get("certifications", [])),
+            "projects": len(parsed.get("projects", [])),
         },
         "warnings": parsed.get("warnings", []),
     }
@@ -227,6 +255,7 @@ def load_profile_summary(conn: sqlite3.Connection) -> dict[str, Any]:
     education = conn.execute("SELECT * FROM profile_education ORDER BY id").fetchall()
     skills = conn.execute("SELECT skill_name FROM profile_skills ORDER BY id").fetchall()
     certifications = conn.execute("SELECT * FROM profile_certifications ORDER BY id").fetchall()
+    projects = conn.execute("SELECT * FROM profile_projects ORDER BY id").fetchall()
 
     return {
         "basics": dict(basics_row) if basics_row else None,
@@ -234,6 +263,7 @@ def load_profile_summary(conn: sqlite3.Connection) -> dict[str, Any]:
         "education": [dict(r) for r in education],
         "skills": [r["skill_name"] for r in skills],
         "certifications": [dict(r) for r in certifications],
+        "projects": [dict(r) for r in projects],
     }
 
 
@@ -244,3 +274,4 @@ def clear_profile(conn: sqlite3.Connection) -> None:
     cur.execute("DELETE FROM profile_education")
     cur.execute("DELETE FROM profile_skills")
     cur.execute("DELETE FROM profile_certifications")
+    cur.execute("DELETE FROM profile_projects")

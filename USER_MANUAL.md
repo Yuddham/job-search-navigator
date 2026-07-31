@@ -32,14 +32,14 @@ every tab.
 ## 2. Profile tab
 
 This is where you import your LinkedIn profile so the app can match jobs against your real
-skills, experience, education, and certifications, and infer your experience level for
-Salary Insights.
+skills, experience, education, certifications, and projects, and infer your experience level
+for Salary Insights.
 
 1. On LinkedIn, go to **Settings & Privacy → Data privacy → Get a copy of your data**
    (the Profile tab has this same walkthrough under "How to export your LinkedIn data").
 2. Choose **"Want something in particular?"** and check at least: **Profile**, **Positions**,
-   **Education**, **Skills**, and **Certifications** (checking more is fine, only these are
-   read).
+   **Education**, **Skills**, **Certifications**, and **Projects** (checking more is fine,
+   only these are read).
 3. Click **Request archive**. LinkedIn emails you a download link once it's ready (usually
    minutes to a few hours).
 4. Download the `.zip` from that email link — don't unzip it.
