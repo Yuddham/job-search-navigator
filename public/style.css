@@ -1,0 +1,268 @@
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #6b6b6b;
+  --border: #e5e5e5;
+  --accent: #1a1a1a;
+  --accent-contrast: #ffffff;
+  --chip-bg: #f0f0f0;
+  --danger: #b3261e;
+  --success: #1a7f37;
+  --warning: #9a6700;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --surface: #1a1a1a;
+    --text: #ededed;
+    --text-muted: #9a9a9a;
+    --border: #2a2a2a;
+    --accent: #ededed;
+    --accent-contrast: #121212;
+    --chip-bg: #232323;
+    --danger: #ff6b61;
+    --success: #4caf6a;
+    --warning: #e0a941;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.topbar h1 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.tab-btn.active {
+  background: var(--chip-bg);
+  color: var(--text);
+  font-weight: 600;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.panel h2 { margin: 0 0 0.75rem; font-size: 1rem; }
+.panel h3 { margin: 1rem 0 0.5rem; font-size: 0.9rem; }
+
+.panel-hint {
+  margin: -0.35rem 0 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.no-fabrication-note { font-style: italic; }
+
+.inline-form { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.5rem; }
+
+.inline-form input, .inline-form select {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.stacked-form { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.stacked-form input, .stacked-form select, .stacked-form textarea {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+button, .secondary-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+button:hover, .secondary-btn:hover { background: var(--chip-bg); }
+
+.status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-height: 1.2em;
+  margin-bottom: 0.75rem;
+}
+
+.status.error { color: var(--danger); }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 800px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.item-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.item-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.item-card-header h3 { margin: 0; font-size: 0.95rem; }
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.2rem;
+}
+
+.delete-btn:hover { color: var(--danger); }
+
+.chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--chip-bg);
+  color: var(--text);
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.chips-muted .chip { color: var(--text-muted); background: transparent; }
+
+.plain-list { padding-left: 1.1rem; margin: 0.25rem 0; font-size: 0.88rem; }
+.plain-list li { margin-bottom: 0.3rem; }
+
+.listing-score { font-weight: 700; font-size: 0.9rem; }
+.listing-meta, .contact-meta, .lead-meta, .cv-meta, .target-job-meta, .criteria-details {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.listing-description { font-size: 0.85rem; margin: 0.2rem 0 0; }
+.listing-link, .lead-link { font-size: 0.82rem; }
+
+.target-job-warning { color: var(--warning); font-size: 0.82rem; margin: 0.2rem 0 0; }
+
+.score-meter {
+  position: relative;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.score-meter-fill { height: 100%; background: var(--success); }
+
+.score-meter-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.checklist-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.checklist-table th, .checklist-table td {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-pass { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); }
+.badge-warning { background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); }
+.badge-fail { background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
+
+.manual-text {
+  white-space: pre-wrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  margin: 0;
+}

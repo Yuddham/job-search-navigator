@@ -1,7 +1,318 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Job Search Navigator</title></head>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator</title>
+<link rel="stylesheet" href="style.css" />
+</head>
 <body>
-<p>Job Search Navigator backend is up. Frontend UI coming in a later build step — try <a href="/docs">/docs</a> in the meantime.</p>
+<header class="topbar">
+  <h1>Job Search Navigator</h1>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="profile">Profile</button>
+    <button class="tab-btn" data-tab="criteria">Search Criteria</button>
+    <button class="tab-btn" data-tab="jobsearch">Job Search</button>
+    <button class="tab-btn" data-tab="manuallistings">Manual Listings</button>
+    <button class="tab-btn" data-tab="contacts">Contacts &amp; Leads</button>
+    <button class="tab-btn" data-tab="cvats">CV &amp; ATS</button>
+    <button class="tab-btn" data-tab="tailor">Tailor CV</button>
+    <button class="tab-btn" data-tab="salary">Salary Insights</button>
+    <button class="tab-btn" data-tab="help">Help</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- Profile -->
+  <section id="profile" class="view active">
+    <div class="panel">
+      <h2>LinkedIn profile</h2>
+      <p class="panel-hint">Upload the .zip from LinkedIn's "Download your data" export. See the Help tab for exactly which boxes to check.</p>
+      <form id="profileUploadForm" class="inline-form">
+        <input type="file" id="profileZipInput" accept=".zip" required />
+        <button type="submit">Upload</button>
+        <button type="button" id="clearProfileBtn" class="secondary-btn">Clear profile</button>
+      </form>
+      <div id="profileStatus" class="status"></div>
+    </div>
+    <div id="profileSummary" class="panel" hidden>
+      <h2>Parsed profile</h2>
+      <div id="profileBasics"></div>
+      <h3>Skills</h3>
+      <div id="profileSkills" class="chips"></div>
+      <h3>Experience</h3>
+      <ul id="profilePositions" class="plain-list"></ul>
+      <h3>Education</h3>
+      <ul id="profileEducation" class="plain-list"></ul>
+      <h3>Certifications</h3>
+      <ul id="profileCertifications" class="plain-list"></ul>
+    </div>
+  </section>
+
+  <!-- Search Criteria -->
+  <section id="criteria" class="view">
+    <div class="panel">
+      <h2>New search criteria</h2>
+      <p class="panel-hint">Describe the job(s) you want. Keywords/roles/locations accept comma-separated lists.</p>
+      <form id="criteriaForm" class="stacked-form">
+        <input type="text" id="criteriaLabel" placeholder="Label, e.g. Backend India" required />
+        <input type="text" id="criteriaKeywords" placeholder="Keywords, e.g. python, fastapi" />
+        <input type="text" id="criteriaRoles" placeholder="Target roles, e.g. Backend Engineer" />
+        <input type="text" id="criteriaIndustries" placeholder="Industries, e.g. Fintech, SaaS" />
+        <input type="text" id="criteriaLocations" placeholder="Locations, e.g. Bangalore, Remote" />
+        <button type="submit">Save criteria</button>
+      </form>
+    </div>
+    <div id="criteriaList" class="card-grid"></div>
+  </section>
+
+  <!-- Job Search -->
+  <section id="jobsearch" class="view">
+    <div class="panel">
+      <h2>Search jobs</h2>
+      <div class="inline-form">
+        <select id="jobSearchCriteriaSelect"></select>
+        <button id="runJobSearchBtn">Search</button>
+      </div>
+    </div>
+    <div id="jobSearchWarnings" class="status"></div>
+    <div id="jobSearchResults" class="card-grid"></div>
+  </section>
+
+  <!-- Manual Listings -->
+  <section id="manuallistings" class="view">
+    <div class="panel">
+      <h2>Add a listing</h2>
+      <p class="panel-hint">Paste in a listing you found on Naukri, Indeed, LinkedIn, or anywhere else -- it will be included in Job Search ranking.</p>
+      <form id="manualListingForm" class="stacked-form">
+        <input type="text" id="listingTitle" placeholder="Title" required />
+        <input type="text" id="listingCompany" placeholder="Company" />
+        <input type="text" id="listingLocation" placeholder="Location" />
+        <input type="url" id="listingUrl" placeholder="URL" />
+        <textarea id="listingDescription" rows="3" placeholder="Description"></textarea>
+        <textarea id="listingNotes" rows="2" placeholder="Notes"></textarea>
+        <button type="submit">Add listing</button>
+      </form>
+    </div>
+    <div id="manualListingsList" class="card-grid"></div>
+  </section>
+
+  <!-- Contacts & Leads -->
+  <section id="contacts" class="view">
+    <div class="two-col">
+      <div>
+        <div class="panel">
+          <h2>Add contact</h2>
+          <p class="panel-hint">Log a recruiter/employee you found while browsing manually.</p>
+          <form id="contactForm" class="stacked-form">
+            <input type="text" id="contactName" placeholder="Name" required />
+            <input type="url" id="contactLinkedin" placeholder="LinkedIn URL" />
+            <input type="text" id="contactCompany" placeholder="Company" />
+            <input type="email" id="contactEmail" placeholder="Email (if you found it yourself)" />
+            <input type="text" id="contactPhone" placeholder="Phone" />
+            <textarea id="contactNotes" rows="2" placeholder="Notes"></textarea>
+            <select id="contactStatus"></select>
+            <button type="submit">Add contact</button>
+          </form>
+        </div>
+        <div id="contactsList" class="card-grid"></div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Add job lead</h2>
+          <p class="panel-hint">Log a job posting (e.g. from LinkedIn) you found by browsing manually.</p>
+          <form id="leadForm" class="stacked-form">
+            <input type="url" id="leadJobUrl" placeholder="Job posting URL" />
+            <input type="text" id="leadCompany" placeholder="Company" />
+            <input type="text" id="leadRecruiterName" placeholder="Recruiter name (if mentioned)" />
+            <select id="leadContactSelect"></select>
+            <textarea id="leadNotes" rows="2" placeholder="Notes"></textarea>
+            <select id="leadStatus"></select>
+            <button type="submit">Add lead</button>
+          </form>
+        </div>
+        <div id="leadsList" class="card-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CV & ATS -->
+  <section id="cvats" class="view">
+    <div class="panel">
+      <h2>Upload CV</h2>
+      <p class="panel-hint">.pdf or .docx. Each upload runs an automatic, deterministic ATS-compliance check -- no AI/LLM involved in the check itself.</p>
+      <form id="cvUploadForm" class="inline-form">
+        <input type="file" id="cvFileInput" accept=".pdf,.docx" required />
+        <button type="submit">Upload</button>
+      </form>
+      <div id="cvUploadStatus" class="status"></div>
+    </div>
+    <div id="cvList" class="card-grid"></div>
+    <div id="atsReportPanel" class="panel" hidden>
+      <h2>ATS report</h2>
+      <div id="atsScoreMeter" class="score-meter"><div class="score-meter-fill"></div><span class="score-meter-label"></span></div>
+      <p id="atsSummary"></p>
+      <table class="checklist-table">
+        <tbody id="atsChecklistBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Tailor CV -->
+  <section id="tailor" class="view">
+    <div class="panel">
+      <h2>Target job</h2>
+      <div class="inline-form">
+        <input type="url" id="targetJobUrl" placeholder="Paste a LinkedIn/Indeed/Naukri job URL" />
+        <button id="fetchTargetJobBtn">Fetch</button>
+      </div>
+      <p class="panel-hint">If fetching fails (common for LinkedIn without login), paste the description manually below.</p>
+      <form id="targetJobManualForm" class="stacked-form">
+        <input type="text" id="manualJobCompany" placeholder="Company" />
+        <input type="text" id="manualJobTitle" placeholder="Title" />
+        <input type="text" id="manualJobLocation" placeholder="Location" />
+        <input type="url" id="manualJobSourceUrl" placeholder="Source URL (optional)" />
+        <textarea id="manualJobText" rows="4" placeholder="Paste the job description text here" required></textarea>
+        <button type="submit">Save job description</button>
+      </form>
+    </div>
+    <div id="targetJobsList" class="card-grid"></div>
+
+    <div class="panel">
+      <h2>Analyze</h2>
+      <div class="inline-form">
+        <select id="tailorCvSelect"></select>
+        <select id="tailorJobSelect"></select>
+        <button id="runTailoringBtn">Analyze</button>
+      </div>
+      <p class="panel-hint no-fabrication-note">Every word in the tailored output below already exists in your uploaded CV -- nothing is invented. Missing keywords are listed as a manual to-do, not auto-written in.</p>
+    </div>
+    <div id="tailoringResult" class="panel" hidden>
+      <p id="tailoringScore"></p>
+      <p id="tailoringKeySkills"></p>
+      <h3>Matched keywords</h3>
+      <div id="matchedKeywordChips" class="chips"></div>
+      <h3>Missing keywords (suggested gaps)</h3>
+      <div id="missingKeywordChips" class="chips chips-muted"></div>
+      <div class="inline-form">
+        <button id="generateMarkdownBtn">Generate Markdown</button>
+        <button id="generateDocxBtn">Generate .docx</button>
+      </div>
+      <div id="tailoringDownloads"></div>
+    </div>
+  </section>
+
+  <!-- Salary Insights -->
+  <section id="salary" class="view">
+    <div class="panel">
+      <h2>Estimate pay</h2>
+      <div class="inline-form">
+        <input type="text" id="salaryWhat" placeholder="Role, e.g. Backend Engineer" />
+        <input type="text" id="salaryWhere" placeholder="Location, e.g. Bangalore" />
+        <button id="runSalaryEstimateBtn">Estimate</button>
+      </div>
+      <div id="salaryResult"></div>
+    </div>
+    <div class="panel">
+      <h3>Past estimates</h3>
+      <table class="checklist-table">
+        <thead><tr><th>Role</th><th>Location</th><th>CTC range</th><th>In-hand range</th><th>Date</th></tr></thead>
+        <tbody id="salaryHistoryBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Help -->
+  <section id="help" class="view">
+    <div class="panel">
+      <pre id="helpManualText" class="manual-text">Loading…</pre>
+    </div>
+  </section>
+
+</main>
+
+<template id="criteriaCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="criteria-label"></h3>
+      <button class="delete-btn" title="Delete">&times;</button>
+    </div>
+    <div class="criteria-details"></div>
+  </div>
+</template>
+
+<template id="manualListingCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="listing-title"></h3>
+      <button class="delete-btn" title="Delete">&times;</button>
+    </div>
+    <div class="listing-meta"></div>
+    <p class="listing-description"></p>
+  </div>
+</template>
+
+<template id="listingCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="listing-title"></h3>
+      <span class="listing-score"></span>
+    </div>
+    <div class="listing-meta"></div>
+    <div class="chips matched-chips"></div>
+    <a class="listing-link" target="_blank" rel="noopener">Open listing</a>
+  </div>
+</template>
+
+<template id="contactCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="contact-name"></h3>
+      <button class="delete-btn" title="Delete">&times;</button>
+    </div>
+    <div class="contact-meta"></div>
+    <select class="contact-status-select"></select>
+  </div>
+</template>
+
+<template id="leadCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="lead-company"></h3>
+      <button class="delete-btn" title="Delete">&times;</button>
+    </div>
+    <div class="lead-meta"></div>
+    <a class="lead-link" target="_blank" rel="noopener">Open posting</a>
+    <select class="lead-status-select"></select>
+  </div>
+</template>
+
+<template id="cvCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="cv-filename"></h3>
+      <button class="delete-btn" title="Delete">&times;</button>
+    </div>
+    <div class="cv-meta"></div>
+    <div class="inline-form">
+      <button class="activate-cv-btn">Set active</button>
+      <button class="view-ats-btn">View ATS report</button>
+    </div>
+  </div>
+</template>
+
+<template id="targetJobCardTemplate">
+  <div class="item-card">
+    <div class="item-card-header">
+      <h3 class="target-job-title"></h3>
+      <button class="delete-btn" title="Delete">&times;</button>
+    </div>
+    <div class="target-job-meta"></div>
+    <p class="target-job-warning"></p>
+  </div>
+</template>
+
+<script src="app.js"></script>
 </body>
 </html>
