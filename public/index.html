@@ -61,8 +61,12 @@
         <input type="text" id="criteriaRoles" placeholder="Target roles, e.g. Backend Engineer" />
         <input type="text" id="criteriaIndustries" placeholder="Industries, e.g. Fintech, SaaS" />
         <input type="text" id="criteriaLocations" placeholder="Locations, e.g. Bangalore, Remote" />
-        <button type="submit">Save criteria</button>
+        <div class="inline-form">
+          <button type="submit" id="criteriaSubmitBtn">Save criteria</button>
+          <button type="button" id="cancelCriteriaEditBtn" class="secondary-btn" hidden>Cancel edit</button>
+        </div>
       </form>
+      <div id="criteriaStatus" class="status"></div>
     </div>
     <div id="criteriaList" class="card-grid"></div>
   </section>
@@ -92,8 +96,12 @@
         <input type="url" id="listingUrl" placeholder="URL" />
         <textarea id="listingDescription" rows="3" placeholder="Description"></textarea>
         <textarea id="listingNotes" rows="2" placeholder="Notes"></textarea>
-        <button type="submit">Add listing</button>
+        <div class="inline-form">
+          <button type="submit" id="listingSubmitBtn">Add listing</button>
+          <button type="button" id="cancelListingEditBtn" class="secondary-btn" hidden>Cancel edit</button>
+        </div>
       </form>
+      <div id="manualListingStatus" class="status"></div>
     </div>
     <div id="manualListingsList" class="card-grid"></div>
   </section>
@@ -113,8 +121,12 @@
             <input type="text" id="contactPhone" placeholder="Phone" />
             <textarea id="contactNotes" rows="2" placeholder="Notes"></textarea>
             <select id="contactStatus"></select>
-            <button type="submit">Add contact</button>
+            <div class="inline-form">
+              <button type="submit" id="contactSubmitBtn">Add contact</button>
+              <button type="button" id="cancelContactEditBtn" class="secondary-btn" hidden>Cancel edit</button>
+            </div>
           </form>
+          <div id="contactFormStatus" class="status"></div>
         </div>
         <div id="contactsList" class="card-grid"></div>
       </div>
@@ -129,8 +141,12 @@
             <select id="leadContactSelect"></select>
             <textarea id="leadNotes" rows="2" placeholder="Notes"></textarea>
             <select id="leadStatus"></select>
-            <button type="submit">Add lead</button>
+            <div class="inline-form">
+              <button type="submit" id="leadSubmitBtn">Add lead</button>
+              <button type="button" id="cancelLeadEditBtn" class="secondary-btn" hidden>Cancel edit</button>
+            </div>
           </form>
+          <div id="leadFormStatus" class="status"></div>
         </div>
         <div id="leadsList" class="card-grid"></div>
       </div>
@@ -176,6 +192,7 @@
         <textarea id="manualJobText" rows="4" placeholder="Paste the job description text here" required></textarea>
         <button type="submit">Save job description</button>
       </form>
+      <div id="targetJobStatus" class="status"></div>
     </div>
     <div id="targetJobsList" class="card-grid"></div>
 
@@ -236,7 +253,10 @@
   <div class="item-card">
     <div class="item-card-header">
       <h3 class="criteria-label"></h3>
-      <button class="delete-btn" title="Delete">&times;</button>
+      <div class="item-card-actions">
+        <button class="edit-btn secondary-btn" title="Edit">Edit</button>
+        <button class="delete-btn" title="Delete">&times;</button>
+      </div>
     </div>
     <div class="criteria-details"></div>
   </div>
@@ -246,7 +266,10 @@
   <div class="item-card">
     <div class="item-card-header">
       <h3 class="listing-title"></h3>
-      <button class="delete-btn" title="Delete">&times;</button>
+      <div class="item-card-actions">
+        <button class="edit-btn secondary-btn" title="Edit">Edit</button>
+        <button class="delete-btn" title="Delete">&times;</button>
+      </div>
     </div>
     <div class="listing-meta"></div>
     <p class="listing-description"></p>
@@ -269,7 +292,10 @@
   <div class="item-card">
     <div class="item-card-header">
       <h3 class="contact-name"></h3>
-      <button class="delete-btn" title="Delete">&times;</button>
+      <div class="item-card-actions">
+        <button class="edit-btn secondary-btn" title="Edit">Edit</button>
+        <button class="delete-btn" title="Delete">&times;</button>
+      </div>
     </div>
     <div class="contact-meta"></div>
     <select class="contact-status-select"></select>
@@ -280,7 +306,10 @@
   <div class="item-card">
     <div class="item-card-header">
       <h3 class="lead-company"></h3>
-      <button class="delete-btn" title="Delete">&times;</button>
+      <div class="item-card-actions">
+        <button class="edit-btn secondary-btn" title="Edit">Edit</button>
+        <button class="delete-btn" title="Delete">&times;</button>
+      </div>
     </div>
     <div class="lead-meta"></div>
     <a class="lead-link" target="_blank" rel="noopener">Open posting</a>

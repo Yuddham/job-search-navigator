@@ -181,6 +181,10 @@ button:hover, .secondary-btn:hover { background: var(--chip-bg); }
 
 .item-card-header h3 { margin: 0; font-size: 0.95rem; }
 
+.item-card-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
+
+.edit-btn { font-size: 0.78rem; padding: 0.2rem 0.6rem; }
+
 .delete-btn {
   background: none;
   border: none;

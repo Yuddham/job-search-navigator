@@ -164,8 +164,20 @@
 
   // ---- Search Criteria ----
 
+  let editingCriteriaId = null;
+
+  function resetCriteriaForm() {
+    editingCriteriaId = null;
+    document.getElementById("criteriaForm").reset();
+    document.getElementById("criteriaSubmitBtn").textContent = "Save criteria";
+    document.getElementById("cancelCriteriaEditBtn").hidden = true;
+  }
+
+  document.getElementById("cancelCriteriaEditBtn").addEventListener("click", resetCriteriaForm);
+
   document.getElementById("criteriaForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const statusEl = document.getElementById("criteriaStatus");
     const payload = {
       label: val("criteriaLabel"),
       keywords: val("criteriaKeywords"),
@@ -173,9 +185,21 @@
       industries: val("criteriaIndustries"),
       locations: val("criteriaLocations"),
     };
-    await api("/api/criteria", { method: "POST", body: payload });
-    e.target.reset();
-    loadCriteria();
+    try {
+      if (editingCriteriaId) {
+        await api(`/api/criteria/${editingCriteriaId}`, { method: "PUT", body: payload });
+        statusEl.textContent = "Criteria updated.";
+      } else {
+        await api("/api/criteria", { method: "POST", body: payload });
+        statusEl.textContent = "Criteria saved.";
+      }
+      statusEl.className = "status";
+      resetCriteriaForm();
+      loadCriteria();
+    } catch (err) {
+      statusEl.textContent = "Save failed: " + err.message;
+      statusEl.className = "status error";
+    }
   });
 
   async function loadCriteria() {
@@ -191,8 +215,22 @@
         .join(" · ");
       node.querySelector(".delete-btn").addEventListener("click", async () => {
         await api(`/api/criteria/${c.id}`, { method: "DELETE" });
+        if (editingCriteriaId === c.id) resetCriteriaForm();
         loadCriteria();
       });
+      const editBtn = node.querySelector(".edit-btn");
+      if (editBtn) {
+        editBtn.addEventListener("click", () => {
+          editingCriteriaId = c.id;
+          document.getElementById("criteriaLabel").value = c.label || "";
+          document.getElementById("criteriaKeywords").value = c.keywords || "";
+          document.getElementById("criteriaRoles").value = c.target_roles || "";
+          document.getElementById("criteriaIndustries").value = c.industries || "";
+          document.getElementById("criteriaLocations").value = c.locations || "";
+          document.getElementById("criteriaSubmitBtn").textContent = "Update criteria";
+          document.getElementById("cancelCriteriaEditBtn").hidden = false;
+        });
+      }
       container.appendChild(node);
     });
   }
@@ -254,8 +292,20 @@
 
   // ---- Manual Listings ----
 
+  let editingListingId = null;
+
+  function resetListingForm() {
+    editingListingId = null;
+    document.getElementById("manualListingForm").reset();
+    document.getElementById("listingSubmitBtn").textContent = "Add listing";
+    document.getElementById("cancelListingEditBtn").hidden = true;
+  }
+
+  document.getElementById("cancelListingEditBtn").addEventListener("click", resetListingForm);
+
   document.getElementById("manualListingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const statusEl = document.getElementById("manualListingStatus");
     const payload = {
       title: val("listingTitle"),
       company: val("listingCompany"),
@@ -264,9 +314,21 @@
       description: val("listingDescription"),
       notes: val("listingNotes"),
     };
-    await api("/api/jobs/manual", { method: "POST", body: payload });
-    e.target.reset();
-    loadManualListings();
+    try {
+      if (editingListingId) {
+        await api(`/api/jobs/manual/${editingListingId}`, { method: "PUT", body: payload });
+        statusEl.textContent = "Listing updated.";
+      } else {
+        await api("/api/jobs/manual", { method: "POST", body: payload });
+        statusEl.textContent = "Listing added.";
+      }
+      statusEl.className = "status";
+      resetListingForm();
+      loadManualListings();
+    } catch (err) {
+      statusEl.textContent = "Save failed: " + err.message;
+      statusEl.className = "status error";
+    }
   });
 
   async function loadManualListings() {
@@ -281,7 +343,19 @@
       node.querySelector(".listing-description").textContent = l.description || "";
       node.querySelector(".delete-btn").addEventListener("click", async () => {
         await api(`/api/jobs/manual/${l.id}`, { method: "DELETE" });
+        if (editingListingId === l.id) resetListingForm();
         loadManualListings();
+      });
+      node.querySelector(".edit-btn").addEventListener("click", () => {
+        editingListingId = l.id;
+        document.getElementById("listingTitle").value = l.title || "";
+        document.getElementById("listingCompany").value = l.company || "";
+        document.getElementById("listingLocation").value = l.location || "";
+        document.getElementById("listingUrl").value = l.url || "";
+        document.getElementById("listingDescription").value = l.description || "";
+        document.getElementById("listingNotes").value = l.notes || "";
+        document.getElementById("listingSubmitBtn").textContent = "Update listing";
+        document.getElementById("cancelListingEditBtn").hidden = false;
       });
       container.appendChild(node);
     });
@@ -292,8 +366,21 @@
   populateStatusSelect(document.getElementById("contactStatus"));
   populateStatusSelect(document.getElementById("leadStatus"));
 
+  let editingContactId = null;
+
+  function resetContactForm() {
+    editingContactId = null;
+    document.getElementById("contactForm").reset();
+    populateStatusSelect(document.getElementById("contactStatus"));
+    document.getElementById("contactSubmitBtn").textContent = "Add contact";
+    document.getElementById("cancelContactEditBtn").hidden = true;
+  }
+
+  document.getElementById("cancelContactEditBtn").addEventListener("click", resetContactForm);
+
   document.getElementById("contactForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const statusEl = document.getElementById("contactFormStatus");
     const payload = {
       name: val("contactName"),
       linkedin_url: val("contactLinkedin"),
@@ -303,10 +390,21 @@
       notes: val("contactNotes"),
       status: document.getElementById("contactStatus").value,
     };
-    await api("/api/contacts", { method: "POST", body: payload });
-    e.target.reset();
-    populateStatusSelect(document.getElementById("contactStatus"));
-    loadContacts();
+    try {
+      if (editingContactId) {
+        await api(`/api/contacts/${editingContactId}`, { method: "PUT", body: payload });
+        statusEl.textContent = "Contact updated.";
+      } else {
+        await api("/api/contacts", { method: "POST", body: payload });
+        statusEl.textContent = "Contact added.";
+      }
+      statusEl.className = "status";
+      resetContactForm();
+      loadContacts();
+    } catch (err) {
+      statusEl.textContent = "Save failed: " + err.message;
+      statusEl.className = "status error";
+    }
   });
 
   async function loadContacts() {
@@ -327,7 +425,20 @@
       });
       node.querySelector(".delete-btn").addEventListener("click", async () => {
         await api(`/api/contacts/${c.id}`, { method: "DELETE" });
+        if (editingContactId === c.id) resetContactForm();
         loadContacts();
+      });
+      node.querySelector(".edit-btn").addEventListener("click", () => {
+        editingContactId = c.id;
+        document.getElementById("contactName").value = c.name || "";
+        document.getElementById("contactLinkedin").value = c.linkedin_url || "";
+        document.getElementById("contactCompany").value = c.company || "";
+        document.getElementById("contactEmail").value = c.email || "";
+        document.getElementById("contactPhone").value = c.phone || "";
+        document.getElementById("contactNotes").value = c.notes || "";
+        populateStatusSelect(document.getElementById("contactStatus"), c.status);
+        document.getElementById("contactSubmitBtn").textContent = "Update contact";
+        document.getElementById("cancelContactEditBtn").hidden = false;
       });
       container.appendChild(node);
     });
@@ -348,8 +459,21 @@
     select.value = previous;
   }
 
+  let editingLeadId = null;
+
+  function resetLeadForm() {
+    editingLeadId = null;
+    document.getElementById("leadForm").reset();
+    populateStatusSelect(document.getElementById("leadStatus"));
+    document.getElementById("leadSubmitBtn").textContent = "Add lead";
+    document.getElementById("cancelLeadEditBtn").hidden = true;
+  }
+
+  document.getElementById("cancelLeadEditBtn").addEventListener("click", resetLeadForm);
+
   document.getElementById("leadForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const statusEl = document.getElementById("leadFormStatus");
     const contactId = document.getElementById("leadContactSelect").value;
     const payload = {
       job_url: val("leadJobUrl"),
@@ -359,10 +483,21 @@
       notes: val("leadNotes"),
       status: document.getElementById("leadStatus").value,
     };
-    await api("/api/leads", { method: "POST", body: payload });
-    e.target.reset();
-    populateStatusSelect(document.getElementById("leadStatus"));
-    loadLeads();
+    try {
+      if (editingLeadId) {
+        await api(`/api/leads/${editingLeadId}`, { method: "PUT", body: payload });
+        statusEl.textContent = "Lead updated.";
+      } else {
+        await api("/api/leads", { method: "POST", body: payload });
+        statusEl.textContent = "Lead added.";
+      }
+      statusEl.className = "status";
+      resetLeadForm();
+      loadLeads();
+    } catch (err) {
+      statusEl.textContent = "Save failed: " + err.message;
+      statusEl.className = "status error";
+    }
   });
 
   async function loadLeads() {
@@ -387,7 +522,19 @@
       });
       node.querySelector(".delete-btn").addEventListener("click", async () => {
         await api(`/api/leads/${l.id}`, { method: "DELETE" });
+        if (editingLeadId === l.id) resetLeadForm();
         loadLeads();
+      });
+      node.querySelector(".edit-btn").addEventListener("click", () => {
+        editingLeadId = l.id;
+        document.getElementById("leadJobUrl").value = l.job_url || "";
+        document.getElementById("leadCompany").value = l.company || "";
+        document.getElementById("leadRecruiterName").value = l.recruiter_name || "";
+        document.getElementById("leadContactSelect").value = l.recruiter_contact_id || "";
+        document.getElementById("leadNotes").value = l.notes || "";
+        populateStatusSelect(document.getElementById("leadStatus"), l.status);
+        document.getElementById("leadSubmitBtn").textContent = "Update lead";
+        document.getElementById("cancelLeadEditBtn").hidden = false;
       });
       container.appendChild(node);
     });
@@ -467,19 +614,26 @@
 
   document.getElementById("fetchTargetJobBtn").addEventListener("click", async () => {
     const url = val("targetJobUrl");
+    const statusEl = document.getElementById("targetJobStatus");
     if (!url) return;
+    statusEl.textContent = "Fetching…";
+    statusEl.className = "status";
     try {
-      await api("/api/target-jobs/fetch-url", { method: "POST", body: { url } });
+      const job = await api("/api/target-jobs/fetch-url", { method: "POST", body: { url } });
       document.getElementById("targetJobUrl").value = "";
+      statusEl.textContent = job.fetch_status === "ok" ? "Fetched successfully." : job.fetch_warning || "Could not fetch this page.";
+      statusEl.className = job.fetch_status === "ok" ? "status" : "status error";
       loadTargetJobs();
       loadJobOptions();
     } catch (err) {
-      window.alert("Fetch failed: " + err.message);
+      statusEl.textContent = "Fetch failed: " + err.message;
+      statusEl.className = "status error";
     }
   });
 
   document.getElementById("targetJobManualForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const statusEl = document.getElementById("targetJobStatus");
     const payload = {
       company: val("manualJobCompany"),
       title: val("manualJobTitle"),
@@ -487,10 +641,17 @@
       source_url: val("manualJobSourceUrl"),
       jd_text: document.getElementById("manualJobText").value.trim(),
     };
-    await api("/api/target-jobs/manual", { method: "POST", body: payload });
-    e.target.reset();
-    loadTargetJobs();
-    loadJobOptions();
+    try {
+      await api("/api/target-jobs/manual", { method: "POST", body: payload });
+      statusEl.textContent = "Job description saved.";
+      statusEl.className = "status";
+      e.target.reset();
+      loadTargetJobs();
+      loadJobOptions();
+    } catch (err) {
+      statusEl.textContent = "Save failed: " + err.message;
+      statusEl.className = "status error";
+    }
   });
 
   async function loadTargetJobs() {
