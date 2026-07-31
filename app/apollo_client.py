@@ -1,8 +1,8 @@
 """Apollo.io client -- STRICTLY SCOPED to organization/company data.
 
 Only two Apollo endpoints are called anywhere in this module:
-  - organization/company search (find companies by keyword/industry/location)
-  - organization job postings (list a company's open roles)
+  - POST /organizations/search (find companies by keyword/industry/location)
+  - GET /organizations/{id}/job_postings (list a company's open roles)
 
 Nothing in this file calls or wraps Apollo's people search, contacts,
 email finder/verifier, sequences, campaigns, or tasks endpoints -- this
@@ -81,7 +81,7 @@ def search_companies(keyword: str = "", location: str = "", per_page: int = 10) 
     if location:
         payload["organization_locations"] = [location]
 
-    data = _cached_request("POST", "/mixed_companies/search", json_body=payload)
+    data = _cached_request("POST", "/organizations/search", json_body=payload)
     orgs = data.get("organizations") or data.get("accounts") or []
 
     results = []
@@ -93,11 +93,16 @@ def search_companies(keyword: str = "", location: str = "", per_page: int = 10) 
             "name": org.get("name"),
             "website_url": org.get("website_url"),
             "industry": org.get("industry"),
-            "location": org.get("city") or org.get("country") or None,
+            "location": _join_location(org.get("city"), org.get("state"), org.get("country")),
             "linkedin_url": org.get("linkedin_url"),
             "employee_count": org.get("estimated_num_employees"),
         })
     return results
+
+
+def _join_location(city: Optional[str], state: Optional[str], country: Optional[str]) -> Optional[str]:
+    parts = [p for p in (city, state, country) if p]
+    return ", ".join(parts) or None
 
 
 def get_job_postings(organization_id: str) -> list[dict[str, Any]]:
@@ -114,7 +119,7 @@ def get_job_postings(organization_id: str) -> list[dict[str, Any]]:
         results.append({
             "title": jp.get("title") or jp.get("name"),
             "url": jp.get("url"),
-            "location": jp.get("location") or jp.get("city"),
+            "location": jp.get("location") or _join_location(jp.get("city"), jp.get("state"), jp.get("country")),
             "posted_at": jp.get("posted_at") or jp.get("last_seen_at"),
         })
     return results

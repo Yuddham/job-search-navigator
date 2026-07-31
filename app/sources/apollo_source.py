@@ -5,6 +5,7 @@ from app import apollo_client
 NAME = "apollo"
 
 MAX_COMPANIES_PER_SEARCH = 5
+MAX_POSTINGS_PER_COMPANY = 10
 
 
 def fetch(conn: sqlite3.Connection, criteria: dict) -> tuple[list[dict], list[str]]:
@@ -37,7 +38,7 @@ def fetch(conn: sqlite3.Connection, criteria: dict) -> tuple[list[dict], list[st
             warnings.append(f"Apollo job postings failed for {company.get('name') or org_id}: {exc}")
             continue
 
-        for jp in postings:
+        for jp in postings[:MAX_POSTINGS_PER_COMPANY]:
             results.append({
                 "source": "apollo",
                 "external_id": f"{org_id}:{jp.get('title')}",
