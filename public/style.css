@@ -58,6 +58,14 @@ body {
 
 .tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 
+.landing-link {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.landing-link:hover { color: var(--text); text-decoration: underline; }
+
 .tab-btn {
   background: none;
   border: none;

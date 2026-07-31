@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Signal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0d;
+    --violet: #8b5cf6;
+    --text: #f2f1f6;
+    --text-muted: #8d899c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+  }
+
+  .rail {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: rgba(139, 92, 246, 0.35);
+  }
+
+  .signal-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  .signal-path {
+    fill: none;
+    stroke: var(--violet);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 7px rgba(139, 92, 246, 0.65));
+  }
+  .signal-dot {
+    fill: var(--violet);
+    filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.8));
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 520px;
+    padding: 12vh 8vw 0;
+  }
+
+  .kicker {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.3rem;
+  }
+
+  h1 {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 500;
+    font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    margin-bottom: 1.1rem;
+    max-width: 380px;
+  }
+
+  .subhead {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    max-width: 360px;
+    margin-bottom: 1.8rem;
+  }
+
+  .cta {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 0.88rem;
+    background: none;
+    color: var(--violet);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .cta::after { content: " →"; }
+
+  .badge {
+    position: absolute;
+    bottom: 6vh;
+    right: 8vw;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .badge span { color: var(--violet); }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="rail"></div>
+  <svg class="signal-svg" viewBox="0 0 1200 700" preserveAspectRatio="none">
+    <path class="signal-path" d="M 120 500 C 260 500, 300 380, 420 380 S 560 460, 680 300 S 820 140, 960 220 S 1080 400, 1160 360" />
+    <circle class="signal-dot" cx="420" cy="380" r="4"></circle>
+    <circle class="signal-dot" cx="960" cy="220" r="4"></circle>
+    <circle class="signal-dot" cx="1160" cy="360" r="5"></circle>
+  </svg>
+  <div class="content">
+    <div class="kicker">For job seekers in India</div>
+    <h1>Your job search, actually organized.</h1>
+    <p class="subhead">Rank real listings against your LinkedIn profile, get an ATS-ready CV in minutes, and track every application — all running locally on your machine.</p>
+    <button class="cta">See how it works</button>
+  </div>
+  <div class="badge">Signal <span>· v4</span></div>
+</section>
+</body>
+</html>

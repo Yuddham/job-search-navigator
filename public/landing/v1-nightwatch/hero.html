@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Nightwatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0b0e;
+    --violet: #6c5ce7;
+    --violet-dim: #4a3fa8;
+    --text: #f2f1f6;
+    --text-muted: #9a97ac;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 8vw;
+    isolation: isolate;
+  }
+
+  /* Left sidebar-rail suggestion -- a slim accent bar, not a full nav */
+  .rail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--violet);
+    z-index: 3;
+  }
+
+  /* Soft-focus receded panels: blurred rectangles suggesting distant UI depth.
+     Deliberately not radial-gradient "glow blobs" -- these are rectangular
+     panel shapes with a blur filter, evoking depth-of-field, not a wash. */
+  .depth-panel {
+    position: absolute;
+    border-radius: 18px;
+    filter: blur(38px);
+    z-index: 0;
+  }
+  .depth-panel.p1 {
+    width: 34vw; height: 40vh;
+    right: 6vw; top: 8vh;
+    background: rgba(108, 92, 231, 0.16);
+    border: 1px solid rgba(108, 92, 231, 0.2);
+  }
+  .depth-panel.p2 {
+    width: 22vw; height: 26vh;
+    right: 14vw; bottom: 6vh;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .depth-panel.p3 {
+    width: 16vw; height: 46vh;
+    right: -4vw; top: 30vh;
+    background: rgba(108, 92, 231, 0.08);
+  }
+
+  .content { position: relative; z-index: 2; max-width: 640px; }
+
+  .kicker {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 1.4rem;
+  }
+
+  h1 {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 4.4vw, 3.8rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.3rem;
+  }
+
+  .subhead {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin-bottom: 2.2rem;
+  }
+
+  .cta-row { display: flex; align-items: center; gap: 1.2rem; }
+
+  .cta {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    background: var(--violet);
+    color: #0b0b0e;
+    border: none;
+    padding: 0.85rem 1.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .rule {
+    width: 44px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--violet), transparent);
+  }
+
+  .badge {
+    display: inline-block;
+    margin-top: 2.4rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+  .badge span { color: var(--violet); }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="rail"></div>
+  <div class="depth-panel p1"></div>
+  <div class="depth-panel p2"></div>
+  <div class="depth-panel p3"></div>
+  <div class="content">
+    <div class="kicker">For job seekers in India</div>
+    <h1>Your job search, actually organized.</h1>
+    <p class="subhead">Rank real listings against your LinkedIn profile, get an ATS-ready CV in minutes, and track every application — all running locally on your machine.</p>
+    <div class="cta-row">
+      <button class="cta">See how it works</button>
+      <div class="rule"></div>
+    </div>
+    <div class="badge">Nightwatch <span>· v1</span></div>
+  </div>
+</section>
+</body>
+</html>
