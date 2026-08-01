@@ -50,6 +50,35 @@ class ApifyAPIError(Exception):
 _cache: dict[str, tuple[float, Any]] = {}
 
 
+def clear_cache() -> None:
+    _cache.clear()
+
+
+def validate_token() -> dict[str, Any]:
+    """Checks APIFY_API_TOKEN against Apify's own identity endpoint
+    (GET /users/me) -- this only confirms the token, it never runs an Actor
+    and isn't billed, unlike search_* below."""
+    if not config.APIFY_API_TOKEN:
+        raise ApifyConfigError(
+            "Apify API token not configured -- set APIFY_API_TOKEN in .env (see USER_MANUAL.md)."
+        )
+
+    try:
+        resp = requests.get(f"{BASE_URL}/users/me", params={"token": config.APIFY_API_TOKEN}, timeout=10)
+    except requests.exceptions.RequestException as exc:
+        raise ApifyAPIError(f"Could not reach Apify: {exc}") from exc
+
+    if resp.status_code in (401, 403):
+        raise ApifyAPIError("Apify rejected the token -- check APIFY_API_TOKEN.", resp.status_code)
+    if resp.status_code >= 400:
+        raise ApifyAPIError(f"Apify returned an error (HTTP {resp.status_code}).", resp.status_code)
+
+    try:
+        return resp.json()
+    except ValueError as exc:
+        raise ApifyAPIError("Apify returned an unreadable response.") from exc
+
+
 def _get_path(d: dict, path: str, default: Any = None) -> Any:
     cur: Any = d
     for part in path.split("."):

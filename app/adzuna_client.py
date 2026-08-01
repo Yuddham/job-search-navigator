@@ -21,6 +21,10 @@ class AdzunaAPIError(Exception):
 _cache: dict[tuple, tuple[float, Any]] = {}
 
 
+def clear_cache() -> None:
+    _cache.clear()
+
+
 def _cached_get(url: str, params: dict[str, Any]) -> dict[str, Any]:
     key = (url, tuple(sorted(params.items())))
     now = time.time()

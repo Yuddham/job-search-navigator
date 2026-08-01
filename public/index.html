@@ -24,6 +24,7 @@
     <button class="tab-btn" data-tab="tailor">Tailor CV</button>
     <button class="tab-btn" data-tab="salary">Salary Insights</button>
     <button class="tab-btn" data-tab="help">Help</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
   </nav>
 </header>
 
@@ -278,6 +279,81 @@
   <section id="help" class="view">
     <div class="panel">
       <pre id="helpManualText" class="manual-text">Loading…</pre>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section id="settings" class="view">
+    <div class="panel">
+      <h2>API keys &amp; connections</h2>
+      <p class="panel-hint">
+        These power Adzuna/Apollo/Apify results in Job Search and Salary Insights. Changes save
+        straight to your local <code>.env</code> file and take effect immediately -- no restart needed.
+      </p>
+      <button type="button" id="refreshSettingsStatusBtn" class="secondary-btn">Refresh connection status</button>
+      <div id="settingsStatus" class="status"></div>
+
+      <form id="settingsForm" class="stacked-form">
+        <div class="settings-field">
+          <label for="settingsAdzunaAppId">Adzuna App ID <span class="status-dot" id="dot-adzuna-id" title="Not checked yet"></span></label>
+          <details class="export-steps">
+            <summary>How to get this (click to expand)</summary>
+            <ol>
+              <li>Register a free account at <a href="https://developer.adzuna.com/" target="_blank" rel="noopener">developer.adzuna.com</a> and create an app.</li>
+              <li>Your <strong>App ID</strong> and <strong>App Key</strong> both appear on that app's dashboard page.</li>
+            </ol>
+          </details>
+          <div class="key-input-row">
+            <input type="password" id="settingsAdzunaAppId" autocomplete="off" placeholder="Not configured" />
+            <button type="button" class="secondary-btn toggle-visibility-btn" data-target="settingsAdzunaAppId">Show</button>
+          </div>
+        </div>
+
+        <div class="settings-field">
+          <label for="settingsAdzunaAppKey">Adzuna App Key <span class="status-dot" id="dot-adzuna-key" title="Not checked yet"></span></label>
+          <div class="key-input-row">
+            <input type="password" id="settingsAdzunaAppKey" autocomplete="off" placeholder="Not configured" />
+            <button type="button" class="secondary-btn toggle-visibility-btn" data-target="settingsAdzunaAppKey">Show</button>
+          </div>
+        </div>
+
+        <div class="settings-field">
+          <label for="settingsApolloApiKey">Apollo API Key <span class="status-dot" id="dot-apollo" title="Not checked yet"></span></label>
+          <details class="export-steps">
+            <summary>How to get this (click to expand)</summary>
+            <ol>
+              <li>Log into your <a href="https://app.apollo.io/" target="_blank" rel="noopener">Apollo.io</a> account.</li>
+              <li>Go to <strong>Settings → Integrations → API</strong> (some plans: <strong>Settings → API Keys</strong>).</li>
+              <li>Copy your API key. Only Apollo's company-search and job-postings data are ever used here -- see the Help tab for the full scope note.</li>
+            </ol>
+          </details>
+          <div class="key-input-row">
+            <input type="password" id="settingsApolloApiKey" autocomplete="off" placeholder="Not configured" />
+            <button type="button" class="secondary-btn toggle-visibility-btn" data-target="settingsApolloApiKey">Show</button>
+          </div>
+        </div>
+
+        <div class="settings-field">
+          <label for="settingsApifyApiToken">Apify API Token <span class="status-dot" id="dot-apify" title="Not checked yet"></span></label>
+          <details class="export-steps">
+            <summary>How to get this (click to expand)</summary>
+            <ol>
+              <li>Log into the <a href="https://console.apify.com/" target="_blank" rel="noopener">Apify Console</a>.</li>
+              <li>Go to <strong>Settings → Integrations</strong>.</li>
+              <li>Copy your default API token, or create a new one.</li>
+            </ol>
+          </details>
+          <div class="key-input-row">
+            <input type="password" id="settingsApifyApiToken" autocomplete="off" placeholder="Not configured" />
+            <button type="button" class="secondary-btn toggle-visibility-btn" data-target="settingsApifyApiToken">Show</button>
+          </div>
+        </div>
+
+        <div class="inline-form">
+          <button type="submit">Save changes</button>
+        </div>
+      </form>
+      <div id="settingsSaveStatus" class="status"></div>
     </div>
   </section>
 

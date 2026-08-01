@@ -4,7 +4,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+ENV_PATH = BASE_DIR / ".env"
+load_dotenv(ENV_PATH)
 
 
 def _resolve(path_str: str) -> Path:
@@ -51,3 +52,38 @@ def ensure_data_dirs() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     CV_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     TAILORED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# Credential keys editable from the Settings tab. Kept as a fixed allowlist
+# (not "any env var") since update_env_values() writes straight to .env.
+EDITABLE_KEYS = ("ADZUNA_APP_ID", "ADZUNA_APP_KEY", "APOLLO_API_KEY", "APIFY_API_TOKEN")
+
+
+def update_env_values(updates: dict[str, str]) -> None:
+    """Persists the given key/value pairs to .env and applies them immediately
+    to this process (os.environ + this module's own globals), so callers that
+    read config.ADZUNA_APP_ID etc. at call-time see the new value right away --
+    no restart needed. Restricted to EDITABLE_KEYS."""
+    updates = {k: v for k, v in updates.items() if k in EDITABLE_KEYS}
+    if not updates:
+        return
+
+    lines = ENV_PATH.read_text(encoding="utf-8").splitlines() if ENV_PATH.exists() else []
+    written = set()
+    new_lines = []
+    for line in lines:
+        stripped = line.strip()
+        key = stripped.split("=", 1)[0].strip() if "=" in stripped and not stripped.startswith("#") else None
+        if key in updates:
+            new_lines.append(f"{key}={updates[key]}")
+            written.add(key)
+        else:
+            new_lines.append(line)
+    for key, value in updates.items():
+        if key not in written:
+            new_lines.append(f"{key}={value}")
+    ENV_PATH.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+
+    for key, value in updates.items():
+        os.environ[key] = value
+        globals()[key] = value

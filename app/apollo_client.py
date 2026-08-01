@@ -35,6 +35,10 @@ class ApolloAPIError(Exception):
 _cache: dict[str, tuple[float, Any]] = {}
 
 
+def clear_cache() -> None:
+    _cache.clear()
+
+
 def _cached_request(method: str, path: str, params: Optional[dict] = None, json_body: Optional[dict] = None) -> dict:
     # json.dumps(..., sort_keys=True) handles list-valued filters (e.g.
     # organization_locations) that a plain tuple(dict.items()) can't hash.

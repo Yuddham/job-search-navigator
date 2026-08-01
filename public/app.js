@@ -79,6 +79,7 @@
     }
     if (tab === "salary") loadSalaryHistory();
     if (tab === "help") loadHelp();
+    if (tab === "settings") loadSettings();
   }
 
   // ---- Deep-link support: ?tab=<id> lets the landing page's radar blips
@@ -1007,6 +1008,83 @@
     const text = await api("/api/help/manual");
     document.getElementById("helpManualText").textContent = text;
   }
+
+  // ---- Settings ----
+
+  function setStatusDot(id, status) {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    dot.classList.remove("connected", "error");
+    if (!status.configured) {
+      dot.title = "Not configured";
+    } else if (status.connected) {
+      dot.classList.add("connected");
+      dot.title = status.message || "Connected";
+    } else {
+      dot.classList.add("error");
+      dot.title = status.message || "Connection failed";
+    }
+  }
+
+  async function loadSettings() {
+    const keys = await api("/api/settings/keys");
+    document.getElementById("settingsAdzunaAppId").value = keys.adzuna_app_id || "";
+    document.getElementById("settingsAdzunaAppKey").value = keys.adzuna_app_key || "";
+    document.getElementById("settingsApolloApiKey").value = keys.apollo_api_key || "";
+    document.getElementById("settingsApifyApiToken").value = keys.apify_api_token || "";
+    refreshSettingsStatus();
+  }
+
+  async function refreshSettingsStatus() {
+    const statusEl = document.getElementById("settingsStatus");
+    statusEl.textContent = "Checking connections…";
+    statusEl.className = "status";
+    try {
+      const status = await api("/api/settings/status");
+      setStatusDot("dot-adzuna-id", status.adzuna);
+      setStatusDot("dot-adzuna-key", status.adzuna);
+      setStatusDot("dot-apollo", status.apollo);
+      setStatusDot("dot-apify", status.apify);
+      statusEl.textContent = "Status updated.";
+    } catch (err) {
+      statusEl.textContent = err.message;
+      statusEl.className = "status error";
+    }
+  }
+
+  document.getElementById("refreshSettingsStatusBtn").addEventListener("click", refreshSettingsStatus);
+
+  document.querySelectorAll(".toggle-visibility-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.target);
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      btn.textContent = isHidden ? "Hide" : "Show";
+    });
+  });
+
+  document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("settingsSaveStatus");
+    statusEl.textContent = "Saving…";
+    statusEl.className = "status";
+    try {
+      await api("/api/settings/keys", {
+        method: "PUT",
+        body: {
+          adzuna_app_id: val("settingsAdzunaAppId"),
+          adzuna_app_key: val("settingsAdzunaAppKey"),
+          apollo_api_key: val("settingsApolloApiKey"),
+          apify_api_token: val("settingsApifyApiToken"),
+        },
+      });
+      statusEl.textContent = "Saved.";
+      refreshSettingsStatus();
+    } catch (err) {
+      statusEl.textContent = err.message;
+      statusEl.className = "status error";
+    }
+  });
 
   // ---- Init ----
 
