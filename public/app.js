@@ -1033,6 +1033,13 @@
     document.getElementById("settingsApolloApiKey").value = keys.apollo_api_key || "";
     document.getElementById("settingsApifyApiToken").value = keys.apify_api_token || "";
     refreshSettingsStatus();
+    loadAppKey();
+  }
+
+  async function loadAppKey() {
+    const data = await api("/api/settings/app-key");
+    document.getElementById("settingsAppKey").value = data.app_key || "";
+    document.getElementById("settingsMcpUrl").value = data.mcp_url || "";
   }
 
   async function refreshSettingsStatus() {
@@ -1080,6 +1087,39 @@
       });
       statusEl.textContent = "Saved.";
       refreshSettingsStatus();
+    } catch (err) {
+      statusEl.textContent = err.message;
+      statusEl.className = "status error";
+    }
+  });
+
+  function copyToClipboard(text, statusEl, label) {
+    navigator.clipboard.writeText(text).then(
+      () => { statusEl.textContent = `${label} copied.`; statusEl.className = "status"; },
+      () => { statusEl.textContent = `Couldn't copy ${label.toLowerCase()} -- copy it manually.`; statusEl.className = "status error"; },
+    );
+  }
+
+  document.getElementById("copyAppKeyBtn").addEventListener("click", () => {
+    copyToClipboard(val("settingsAppKey"), document.getElementById("appKeyStatus"), "App Key");
+  });
+
+  document.getElementById("copyMcpUrlBtn").addEventListener("click", () => {
+    copyToClipboard(val("settingsMcpUrl"), document.getElementById("appKeyStatus"), "MCP server URL");
+  });
+
+  document.getElementById("regenerateAppKeyBtn").addEventListener("click", async () => {
+    const statusEl = document.getElementById("appKeyStatus");
+    if (!confirm("Regenerate the App Key? Any tool (Claude Code, etc.) already connected with the old key will stop working until you update it with the new one.")) {
+      return;
+    }
+    statusEl.textContent = "Regenerating…";
+    statusEl.className = "status";
+    try {
+      const data = await api("/api/settings/app-key/regenerate", { method: "POST" });
+      document.getElementById("settingsAppKey").value = data.app_key || "";
+      document.getElementById("settingsMcpUrl").value = data.mcp_url || "";
+      statusEl.textContent = "New App Key generated.";
     } catch (err) {
       statusEl.textContent = err.message;
       statusEl.className = "status error";

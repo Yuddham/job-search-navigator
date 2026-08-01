@@ -355,6 +355,43 @@
       </form>
       <div id="settingsSaveStatus" class="status"></div>
     </div>
+
+    <div class="panel">
+      <h2>App Key (for Claude Code &amp; other LLMs)</h2>
+      <p class="panel-hint">
+        Lets external tools like Claude Code connect to this app over MCP and query your job
+        search data (search jobs, profile summary, salary estimates, etc.) -- read-only. This is
+        separate from the Adzuna/Apollo/Apify keys above, which authenticate this app
+        <em>outward</em> to those services -- this key authenticates other tools
+        <em>inward</em>, into this app.
+      </p>
+      <div class="settings-field">
+        <label for="settingsAppKey">App Key</label>
+        <div class="key-input-row">
+          <input type="password" id="settingsAppKey" readonly autocomplete="off" />
+          <button type="button" class="secondary-btn toggle-visibility-btn" data-target="settingsAppKey">Show</button>
+          <button type="button" id="copyAppKeyBtn" class="secondary-btn">Copy</button>
+        </div>
+      </div>
+      <div class="settings-field">
+        <label for="settingsMcpUrl">MCP server URL</label>
+        <div class="key-input-row">
+          <input type="text" id="settingsMcpUrl" readonly autocomplete="off" />
+          <button type="button" id="copyMcpUrlBtn" class="secondary-btn">Copy</button>
+        </div>
+      </div>
+      <button type="button" id="regenerateAppKeyBtn" class="secondary-btn">Regenerate key</button>
+      <div id="appKeyStatus" class="status"></div>
+      <details class="export-steps">
+        <summary>How to connect this to Claude Code or another LLM (click to expand)</summary>
+        <ol>
+          <li>Make sure this app is running (locally, or as the installed tray app) -- the MCP server only answers while it's running.</li>
+          <li>Copy the <strong>App Key</strong> and <strong>MCP server URL</strong> above.</li>
+          <li>In Claude Code: <code>claude mcp add --transport http job-search-navigator &lt;MCP server URL&gt; --header "Authorization: Bearer &lt;App Key&gt;"</code></li>
+          <li>See the Help tab for the full walkthrough, including the equivalent for other MCP-compatible LLM tools.</li>
+        </ol>
+      </details>
+    </div>
   </section>
 
 </main>

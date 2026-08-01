@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -17,6 +18,11 @@ ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "").strip()
 ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "").strip()
 APOLLO_API_KEY = os.environ.get("APOLLO_API_KEY", "").strip()
 APIFY_API_TOKEN = os.environ.get("APIFY_API_TOKEN", "").strip()
+
+# Not a third-party credential like the three above -- this is a key this app
+# generates ITSELF, so external tools (Claude Code, other MCP clients) can
+# authenticate INTO this app's /mcp endpoint. See app/mcp_server.py.
+APP_KEY = os.environ.get("APP_KEY", "").strip()
 
 PORT = int(os.environ.get("PORT", "8000"))
 DB_PATH = _resolve(os.environ.get("DB_PATH", "./data/job_search.db"))
@@ -54,9 +60,12 @@ def ensure_data_dirs() -> None:
     TAILORED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# Credential keys editable from the Settings tab. Kept as a fixed allowlist
-# (not "any env var") since update_env_values() writes straight to .env.
-EDITABLE_KEYS = ("ADZUNA_APP_ID", "ADZUNA_APP_KEY", "APOLLO_API_KEY", "APIFY_API_TOKEN")
+# Env vars update_env_values() is allowed to persist. Kept as a fixed
+# allowlist (not "any env var"). Note this only governs *this* function --
+# it does not mean a route lets a caller set any of these to arbitrary text;
+# e.g. APP_KEY is only ever written by regenerate_app_key() below, never from
+# free-text user input (see routes/settings.py's KeysIn model).
+EDITABLE_KEYS = ("ADZUNA_APP_ID", "ADZUNA_APP_KEY", "APOLLO_API_KEY", "APIFY_API_TOKEN", "APP_KEY")
 
 
 def update_env_values(updates: dict[str, str]) -> None:
@@ -87,3 +96,19 @@ def update_env_values(updates: dict[str, str]) -> None:
     for key, value in updates.items():
         os.environ[key] = value
         globals()[key] = value
+
+
+def ensure_app_key() -> str:
+    """Generates APP_KEY on first run (persisted to .env) if it doesn't
+    already exist. Called once at startup so the app always has one."""
+    if not APP_KEY:
+        update_env_values({"APP_KEY": secrets.token_urlsafe(32)})
+    return APP_KEY
+
+
+def regenerate_app_key() -> str:
+    """Issues a brand-new APP_KEY, invalidating the old one immediately for
+    any already-connected MCP client."""
+    new_key = secrets.token_urlsafe(32)
+    update_env_values({"APP_KEY": new_key})
+    return new_key

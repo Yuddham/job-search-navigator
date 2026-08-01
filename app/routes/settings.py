@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
 from app import adzuna_client, apify_client, apollo_client, config
@@ -113,3 +113,28 @@ def _check_apify() -> ConnectionStatus:
 @router.get("/status", response_model=StatusOut)
 def get_status() -> StatusOut:
     return StatusOut(adzuna=_check_adzuna(), apollo=_check_apollo(), apify=_check_apify())
+
+
+class AppKeyOut(BaseModel):
+    app_key: str
+    mcp_url: str
+
+
+def _app_key_out(request: Request) -> AppKeyOut:
+    # Trailing slash is required: Starlette's Mount only dispatches "/mcp/..."
+    # into the MCP app, not the bare "/mcp" (that 404s before auth even runs).
+    return AppKeyOut(app_key=config.APP_KEY, mcp_url=str(request.base_url).rstrip("/") + "/mcp/")
+
+
+@router.get("/app-key", response_model=AppKeyOut)
+def get_app_key(request: Request) -> AppKeyOut:
+    """This is NOT one of the Adzuna/Apollo/Apify credentials -- it's a key
+    this app generates itself, so external tools (Claude Code, other MCP
+    clients) can authenticate into this app's own /mcp endpoint."""
+    return _app_key_out(request)
+
+
+@router.post("/app-key/regenerate", response_model=AppKeyOut)
+def regenerate_app_key_route(request: Request) -> AppKeyOut:
+    config.regenerate_app_key()
+    return _app_key_out(request)
