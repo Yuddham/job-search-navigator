@@ -25,8 +25,13 @@ if ($installed) {
 
 $bootstrapper = Join-Path $env:TEMP "MicrosoftEdgeWebview2Setup.exe"
 try {
-    Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $bootstrapper -UseBasicParsing
-    Start-Process -FilePath $bootstrapper -ArgumentList "/silent", "/install" -Wait
+    # Explicit timeouts on both steps -- a slow/stalled network or a hung
+    # bootstrapper must never leave the installer stuck waiting forever.
+    Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $bootstrapper -UseBasicParsing -TimeoutSec 30
+    $proc = Start-Process -FilePath $bootstrapper -ArgumentList "/silent", "/install" -PassThru
+    if (-not $proc.WaitForExit(120000)) {
+        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+    }
 } catch {
     # Non-fatal: if this fails (e.g. no internet at install time), Navigrad
     # will simply fail to open its window until WebView2 is installed some

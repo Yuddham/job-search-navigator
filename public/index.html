@@ -438,6 +438,35 @@
       </details>
     </div>
 
+    <div class="panel">
+      <h2>LinkedIn Account (for LinkedIn job search)</h2>
+      <div class="warning-banner">
+        &#9888; <strong>Warning:</strong> connecting your LinkedIn account here is for automated
+        job searching, which may violate LinkedIn's Terms of Service and could get your account
+        suspended or banned. This is optional, off by default, and entirely at your own risk --
+        Navigrad never sees or stores your LinkedIn password; connecting opens a real LinkedIn
+        login page in its own browser window for you to sign in yourself.
+      </div>
+      <p class="panel-hint">
+        This is separate from the four keys above. It searches LinkedIn job listings via a
+        third-party open-source tool (<code>eliasbiondo/linkedin-mcp-server</code>) that drives a
+        real browser against LinkedIn's own site, rather than going through Apify's proxies like
+        the existing LinkedIn Jobs source. Results from this source are labeled
+        "linkedin_account" (vs. "linkedin_jobs" for the Apify-based one) so you can tell them
+        apart in Job Search. Requires <a href="https://git-scm.com/downloads" target="_blank" rel="noopener">git</a>
+        and <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv</a>
+        installed separately -- this one optional feature isn't pip-installable, so it's the one
+        exception to Navigrad otherwise bundling everything it needs.
+      </p>
+      <label class="panel-hint">
+        <input type="checkbox" id="linkedinEnabledToggle" /> Enable LinkedIn account search in Job Search
+      </label>
+      <div class="inline-form">
+        <button type="button" id="linkedinConnectBtn" class="secondary-btn">Connect LinkedIn account</button>
+      </div>
+      <div id="linkedinAccountStatus" class="status"></div>
+    </div>
+
     <p class="signature">Built with passion, by Nil J</p>
   </section>
 

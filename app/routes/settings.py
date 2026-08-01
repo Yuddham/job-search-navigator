@@ -1,9 +1,10 @@
+import threading
 from typing import Optional
 
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
-from app import adzuna_client, apify_client, apollo_client, config
+from app import adzuna_client, apify_client, apollo_client, config, linkedin_mcp_client
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -138,3 +139,62 @@ def get_app_key(request: Request) -> AppKeyOut:
 def regenerate_app_key_route(request: Request) -> AppKeyOut:
     config.regenerate_app_key()
     return _app_key_out(request)
+
+
+class LinkedInAccountStatus(BaseModel):
+    tooling_available: bool
+    installed: bool
+    connected: bool
+    enabled: bool
+    connecting: bool
+    error: Optional[str] = None
+
+
+class LinkedInEnableIn(BaseModel):
+    enabled: bool
+
+
+_linkedin_connect_state: dict = {"connecting": False, "error": None}
+
+
+@router.get("/linkedin-account", response_model=LinkedInAccountStatus)
+def get_linkedin_account_status() -> LinkedInAccountStatus:
+    """Status for the Settings tab's LinkedIn Account section -- see
+    app/linkedin_mcp_client.py for what this feature is and why it's kept
+    separate from the Adzuna/Apollo/Apify keys above."""
+    s = linkedin_mcp_client.status()
+    return LinkedInAccountStatus(
+        **s,
+        connecting=_linkedin_connect_state["connecting"],
+        error=_linkedin_connect_state["error"],
+    )
+
+
+@router.post("/linkedin-account/enable", response_model=LinkedInAccountStatus)
+def set_linkedin_account_enabled(payload: LinkedInEnableIn) -> LinkedInAccountStatus:
+    config.update_env_values({"LINKEDIN_MCP_ENABLED": "true" if payload.enabled else "false"})
+    return get_linkedin_account_status()
+
+
+def _connect_in_background() -> None:
+    try:
+        linkedin_mcp_client.start_login()
+    except Exception as exc:  # noqa: BLE001 -- surfaced to the UI via status polling
+        _linkedin_connect_state["error"] = str(exc)
+    finally:
+        _linkedin_connect_state["connecting"] = False
+
+
+@router.post("/linkedin-account/connect", response_model=LinkedInAccountStatus)
+def connect_linkedin_account() -> LinkedInAccountStatus:
+    """Kicks off install (if needed) + the interactive --login flow in the
+    background and returns immediately -- installing alone can take minutes
+    (git clone + a Patchright browser download), and login itself opens a
+    real browser window for the user to sign into LinkedIn themselves, which
+    this endpoint can't wait on. The frontend polls GET .../linkedin-account
+    afterward to see when it's installed/connected."""
+    if not _linkedin_connect_state["connecting"]:
+        _linkedin_connect_state["connecting"] = True
+        _linkedin_connect_state["error"] = None
+        threading.Thread(target=_connect_in_background, daemon=True).start()
+    return get_linkedin_account_status()

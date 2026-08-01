@@ -360,6 +360,17 @@ button:hover, .secondary-btn:hover { background: var(--chip-bg); }
 .status-dot.connected { background: var(--success); }
 .status-dot.error { background: var(--danger); }
 
+.warning-banner {
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0.9rem;
+}
+
 .key-input-row { display: flex; gap: 0.5rem; }
 
 .key-input-row input {

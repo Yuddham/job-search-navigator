@@ -1106,6 +1106,7 @@
     document.getElementById("settingsApifyApiToken").value = keys.apify_api_token || "";
     refreshSettingsStatus();
     loadAppKey();
+    loadLinkedInAccountStatus();
   }
 
   async function loadAppKey() {
@@ -1192,6 +1193,89 @@
       document.getElementById("settingsAppKey").value = data.app_key || "";
       document.getElementById("settingsMcpUrl").value = data.mcp_url || "";
       statusEl.textContent = "New App Key generated.";
+    } catch (err) {
+      statusEl.textContent = err.message;
+      statusEl.className = "status error";
+    }
+  });
+
+  // ---- LinkedIn Account (optional, off by default -- see linkedin_mcp_client.py) ----
+
+  let linkedinPollTimer = null;
+
+  function renderLinkedInStatus(s) {
+    document.getElementById("linkedinEnabledToggle").checked = !!s.enabled;
+    const statusEl = document.getElementById("linkedinAccountStatus");
+    const btn = document.getElementById("linkedinConnectBtn");
+
+    if (!s.tooling_available) {
+      statusEl.textContent = "Not available -- install git and uv first (links above), then reopen this tab.";
+      statusEl.className = "status error";
+      btn.disabled = true;
+      return;
+    }
+    btn.disabled = false;
+
+    if (s.error) {
+      statusEl.textContent = "Connection attempt failed: " + s.error;
+      statusEl.className = "status error";
+    } else if (s.connecting) {
+      statusEl.textContent = "Installing / waiting for LinkedIn login in the opened browser window…";
+      statusEl.className = "status";
+    } else if (s.connected) {
+      statusEl.textContent = "Browser session set up. If searches come back empty or limited, click Connect again to (re-)log in -- this app can't verify LinkedIn login state precisely from the outside.";
+      statusEl.className = "status";
+    } else if (s.installed) {
+      statusEl.textContent = "Installed but not set up yet -- click Connect and log in.";
+      statusEl.className = "status";
+    } else {
+      statusEl.textContent = "Not installed yet.";
+      statusEl.className = "status";
+    }
+
+    if (s.connecting) {
+      if (!linkedinPollTimer) linkedinPollTimer = setInterval(loadLinkedInAccountStatus, 3000);
+    } else if (linkedinPollTimer) {
+      clearInterval(linkedinPollTimer);
+      linkedinPollTimer = null;
+    }
+  }
+
+  async function loadLinkedInAccountStatus() {
+    try {
+      const s = await api("/api/settings/linkedin-account");
+      renderLinkedInStatus(s);
+    } catch (err) {
+      document.getElementById("linkedinAccountStatus").textContent = err.message;
+      document.getElementById("linkedinAccountStatus").className = "status error";
+    }
+  }
+
+  document.getElementById("linkedinEnabledToggle").addEventListener("change", async (e) => {
+    try {
+      const s = await api("/api/settings/linkedin-account/enable", { method: "POST", body: { enabled: e.target.checked } });
+      renderLinkedInStatus(s);
+    } catch (err) {
+      document.getElementById("linkedinAccountStatus").textContent = err.message;
+      document.getElementById("linkedinAccountStatus").className = "status error";
+      e.target.checked = !e.target.checked;
+    }
+  });
+
+  document.getElementById("linkedinConnectBtn").addEventListener("click", async () => {
+    const statusEl = document.getElementById("linkedinAccountStatus");
+    if (!confirm(
+      "This will install eliasbiondo/linkedin-mcp-server (if not already) and open a real LinkedIn " +
+      "login page in its own browser window for you to sign in. Using your LinkedIn account this way " +
+      "may violate LinkedIn's Terms of Service and could get it suspended or banned. Continue?"
+    )) {
+      return;
+    }
+    statusEl.textContent = "Starting…";
+    statusEl.className = "status";
+    try {
+      const s = await api("/api/settings/linkedin-account/connect", { method: "POST" });
+      renderLinkedInStatus(s);
     } catch (err) {
       statusEl.textContent = err.message;
       statusEl.className = "status error";

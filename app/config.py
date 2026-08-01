@@ -36,6 +36,13 @@ APIFY_API_TOKEN = os.environ.get("APIFY_API_TOKEN", "").strip()
 # authenticate INTO this app's /mcp endpoint. See app/mcp_server.py.
 APP_KEY = os.environ.get("APP_KEY", "").strip()
 
+# Off by default. Gates the LinkedIn *account* job search (via
+# eliasbiondo/linkedin-mcp-server, app/linkedin_mcp_client.py) -- a
+# fundamentally different, higher-risk source than every other one in this
+# app since it drives a real browser against LinkedIn's own site, optionally
+# signed into the user's personal account. See that module's docstring.
+LINKEDIN_MCP_ENABLED = os.environ.get("LINKEDIN_MCP_ENABLED", "false").strip().lower() == "true"
+
 PORT = int(os.environ.get("PORT", "8000"))
 DB_PATH = _resolve(os.environ.get("DB_PATH", "./data/job_search.db"))
 CV_UPLOAD_DIR = _resolve(os.environ.get("CV_UPLOAD_DIR", "./data/uploads/cv"))
@@ -77,7 +84,10 @@ def ensure_data_dirs() -> None:
 # it does not mean a route lets a caller set any of these to arbitrary text;
 # e.g. APP_KEY is only ever written by regenerate_app_key() below, never from
 # free-text user input (see routes/settings.py's KeysIn model).
-EDITABLE_KEYS = ("ADZUNA_APP_ID", "ADZUNA_APP_KEY", "APOLLO_API_KEY", "APIFY_API_TOKEN", "APP_KEY")
+EDITABLE_KEYS = (
+    "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "APOLLO_API_KEY", "APIFY_API_TOKEN", "APP_KEY",
+    "LINKEDIN_MCP_ENABLED",
+)
 
 
 def update_env_values(updates: dict[str, str]) -> None:
