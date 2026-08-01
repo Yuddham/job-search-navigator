@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="design-tokens.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 <header class="topbar">
@@ -56,7 +57,11 @@
       <div id="profileStatus" class="status"></div>
     </div>
     <div id="profileSummary" class="panel" hidden>
-      <h2>Parsed profile</h2>
+      <div class="item-card-header">
+        <h2>Parsed profile</h2>
+        <button type="button" id="exportProfileBtn" class="secondary-btn">Export as text file</button>
+      </div>
+      <div id="profileExportStatus" class="status"></div>
       <div id="profileBasics"></div>
       <h3>Skills</h3>
       <div id="profileSkills" class="chips"></div>
@@ -89,6 +94,10 @@
       </form>
       <div id="criteriaStatus" class="status"></div>
     </div>
+    <div class="inline-form">
+      <button type="button" id="exportCriteriaBtn" class="secondary-btn">Export as text file</button>
+    </div>
+    <div id="criteriaExportStatus" class="status"></div>
     <div id="criteriaList" class="card-grid"></div>
   </section>
 
@@ -99,9 +108,11 @@
       <div class="inline-form">
         <select id="jobSearchCriteriaSelect"></select>
         <button id="runJobSearchBtn">Search</button>
+        <button type="button" id="exportJobSearchBtn" class="secondary-btn">Export results as text file</button>
       </div>
     </div>
     <div id="jobSearchWarnings" class="status"></div>
+    <div id="jobSearchExportStatus" class="status"></div>
     <div id="jobSearchResults" class="card-grid"></div>
   </section>
 
@@ -128,6 +139,10 @@
       </form>
       <div id="manualListingStatus" class="status"></div>
     </div>
+    <div class="inline-form">
+      <button type="button" id="exportManualListingsBtn" class="secondary-btn">Export as text file</button>
+    </div>
+    <div id="manualListingsExportStatus" class="status"></div>
     <div id="manualListingsList" class="card-grid"></div>
   </section>
 
@@ -153,6 +168,10 @@
           </form>
           <div id="contactFormStatus" class="status"></div>
         </div>
+        <div class="inline-form">
+          <button type="button" id="exportContactsBtn" class="secondary-btn">Export as text file</button>
+        </div>
+        <div id="contactsExportStatus" class="status"></div>
         <div id="contactsList" class="card-grid"></div>
       </div>
       <div>
@@ -177,6 +196,10 @@
           </form>
           <div id="leadFormStatus" class="status"></div>
         </div>
+        <div class="inline-form">
+          <button type="button" id="exportLeadsBtn" class="secondary-btn">Export as text file</button>
+        </div>
+        <div id="leadsExportStatus" class="status"></div>
         <div id="leadsList" class="card-grid"></div>
       </div>
     </div>
@@ -193,6 +216,10 @@
       </form>
       <div id="cvUploadStatus" class="status"></div>
     </div>
+    <div class="inline-form">
+      <button type="button" id="exportCvsBtn" class="secondary-btn">Export as text file</button>
+    </div>
+    <div id="cvExportStatus" class="status"></div>
     <div id="cvList" class="card-grid"></div>
     <div id="atsReportPanel" class="panel" hidden>
       <h2>ATS report</h2>
@@ -223,6 +250,10 @@
       </form>
       <div id="targetJobStatus" class="status"></div>
     </div>
+    <div class="inline-form">
+      <button type="button" id="exportTargetJobsBtn" class="secondary-btn">Export as text file</button>
+    </div>
+    <div id="targetJobsExportStatus" class="status"></div>
     <div id="targetJobsList" class="card-grid"></div>
 
     <div class="panel">
@@ -244,15 +275,21 @@
       <div class="inline-form">
         <button id="generateMarkdownBtn">Generate Markdown</button>
         <button id="generateDocxBtn">Generate .docx</button>
+        <button type="button" id="exportTailoringBtn" class="secondary-btn">Export analysis as text file</button>
       </div>
+      <div id="tailoringExportStatus" class="status"></div>
       <div id="tailoringDownloads"></div>
     </div>
 
     <div class="panel">
       <h2>Similar companies &amp; positions</h2>
       <p class="panel-hint">Uses the selected target job's company/location (via Apollo's company-search and job-postings data -- no contact/people data touched) to suggest similar companies and their open roles.</p>
-      <button id="findSimilarCompaniesBtn">Find similar companies</button>
+      <div class="inline-form">
+        <button id="findSimilarCompaniesBtn">Find similar companies</button>
+        <button type="button" id="exportSimilarCompaniesBtn" class="secondary-btn">Export as text file</button>
+      </div>
       <div id="similarCompaniesStatus" class="status"></div>
+      <div id="similarCompaniesExportStatus" class="status"></div>
       <div id="similarCompaniesList" class="card-grid"></div>
     </div>
   </section>
@@ -270,7 +307,11 @@
       <div id="salaryResult"></div>
     </div>
     <div class="panel">
-      <h3>Past estimates</h3>
+      <div class="item-card-header">
+        <h3>Past estimates</h3>
+        <button type="button" id="exportSalaryBtn" class="secondary-btn">Export as text file</button>
+      </div>
+      <div id="salaryExportStatus" class="status"></div>
       <table class="checklist-table">
         <thead><tr><th>Role</th><th>Location</th><th>CTC range</th><th>In-hand range</th><th>Date</th><th></th></tr></thead>
         <tbody id="salaryHistoryBody"></tbody>
@@ -281,7 +322,7 @@
   <!-- Help -->
   <section id="help" class="view">
     <div class="panel">
-      <pre id="helpManualText" class="manual-text">Loading…</pre>
+      <div id="helpManualText" class="manual-text">Loading…</div>
     </div>
   </section>
 

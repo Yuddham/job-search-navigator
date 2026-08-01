@@ -1,6 +1,9 @@
 (() => {
   const STATUS_VALUES = ["not_contacted", "messaged", "responded", "interviewing", "closed"];
   let currentTailoringReportId = null;
+  let lastJobSearchResults = null;
+  let lastTailoringReport = null;
+  let lastSimilarCompanies = [];
 
   function val(id) {
     return document.getElementById(id).value.trim();
@@ -37,6 +40,64 @@
     const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) return res.json();
     return res.text();
+  }
+
+  // ---- Export-as-text-file ----
+  // Uses the File System Access API (Chrome/Edge) so the browser's own native
+  // Save As dialog lets the user pick the location and filename. Falls back
+  // to a plain download (Firefox/Safari, which don't support that API yet).
+  async function saveTextFile(suggestedName, content) {
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: "Text file", accept: { "text/plain": [".txt"] } }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        return "saved";
+      } catch (err) {
+        if (err.name === "AbortError") return "cancelled";
+        throw err;
+      }
+    }
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = suggestedName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    return "saved";
+  }
+
+  function wireExport(buttonId, statusId, suggestedName, buildText) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      const statusEl = document.getElementById(statusId);
+      try {
+        const text = await buildText();
+        if (!text || !text.trim()) {
+          if (statusEl) { statusEl.textContent = "Nothing to export yet."; statusEl.className = "status"; }
+          return;
+        }
+        const outcome = await saveTextFile(suggestedName, text);
+        if (statusEl) {
+          statusEl.textContent = outcome === "saved" ? "Exported." : "Export cancelled.";
+          statusEl.className = "status";
+        }
+      } catch (err) {
+        if (statusEl) { statusEl.textContent = "Export failed: " + err.message; statusEl.className = "status error"; }
+      }
+    });
+  }
+
+  function exportHeader(title) {
+    return `${title}\nExported from Job Search Navigator on ${new Date().toLocaleString()}\n${"=".repeat(60)}\n\n`;
   }
 
   function populateStatusSelect(select, current) {
@@ -300,6 +361,7 @@
     try {
       const qs = select.value ? `?criteria_id=${select.value}` : "";
       const data = await api(`/api/jobs/search${qs}`);
+      lastJobSearchResults = data;
       warningsEl.textContent = data.warnings.join(" ");
       const tpl = document.getElementById("listingCardTemplate");
       data.results.forEach((r) => {
@@ -812,6 +874,7 @@
   });
 
   function showTailoringReport(report) {
+    lastTailoringReport = report;
     const panel = document.getElementById("tailoringResult");
     panel.hidden = false;
     document.getElementById("tailoringScore").textContent = `Match score: ${report.match_score}%`;
@@ -890,6 +953,7 @@
       } else {
         statusEl.textContent = `Found ${resp.companies.length} compan${resp.companies.length === 1 ? "y" : "ies"}.`;
       }
+      lastSimilarCompanies = resp.companies.map((c) => ({ ...c, postings: null }));
       const tpl = document.getElementById("apolloCompanyCardTemplate");
       resp.companies.forEach((c) => {
         const node = tpl.content.cloneNode(true);
@@ -906,6 +970,8 @@
           evt.target.textContent = "Loading…";
           try {
             const postingsResp = await api(`/api/apollo/job-postings?organization_id=${encodeURIComponent(c.id)}`);
+            const tracked = lastSimilarCompanies.find((sc) => sc.id === c.id);
+            if (tracked) tracked.postings = postingsResp.warning ? null : postingsResp.postings;
             postingsList.innerHTML = "";
             if (postingsResp.warning) {
               postingsList.innerHTML = `<p class="status error">${escapeHtml(postingsResp.warning)}</p>`;
@@ -1006,7 +1072,13 @@
 
   async function loadHelp() {
     const text = await api("/api/help/manual");
-    document.getElementById("helpManualText").textContent = text;
+    const el = document.getElementById("helpManualText");
+    if (window.marked) {
+      el.innerHTML = marked.parse(text);
+    } else {
+      // marked.js failed to load (e.g. offline) -- plain text beats nothing.
+      el.textContent = text;
+    }
   }
 
   // ---- Settings ----
@@ -1124,6 +1196,216 @@
       statusEl.textContent = err.message;
       statusEl.className = "status error";
     }
+  });
+
+  // ---- Exports (each opens a native Save As dialog via saveTextFile) ----
+
+  wireExport("exportProfileBtn", "profileExportStatus", "profile.txt", async () => {
+    const summary = await api("/api/profile");
+    const basics = summary.basics || {};
+    const name = [basics.first_name, basics.last_name].filter(Boolean).join(" ") || "(no name)";
+    let text = exportHeader("LINKEDIN PROFILE");
+    text += `${name}\n`;
+    if (basics.headline) text += `${basics.headline}\n`;
+    text += [basics.industry, basics.location].filter(Boolean).join(" · ") + "\n\n";
+
+    text += "SKILLS\n" + (summary.skills || []).map((s) => `- ${s}`).join("\n") + "\n\n";
+
+    text +=
+      "EXPERIENCE\n" +
+      (summary.positions || [])
+        .map((p) => `- ${p.title || ""} at ${p.company || ""} (${p.started_on || "?"} – ${p.ended_on || "?"})`)
+        .join("\n") +
+      "\n\n";
+
+    text +=
+      "EDUCATION\n" +
+      (summary.education || [])
+        .map((e) => `- ${e.degree_name || ""}${e.field_of_study ? " (" + e.field_of_study + ")" : ""} – ${e.school_name || ""}`)
+        .join("\n") +
+      "\n\n";
+
+    text +=
+      "CERTIFICATIONS\n" +
+      (summary.certifications || []).map((c) => `- ${c.name || ""}${c.authority ? " – " + c.authority : ""}`).join("\n") +
+      "\n\n";
+
+    text +=
+      "PROJECTS\n" +
+      (summary.projects || [])
+        .map((p) => {
+          let line = `- ${p.title || ""}`;
+          if (p.started_on || p.finished_on) line += ` (${p.started_on || "?"} – ${p.finished_on || "?"})`;
+          if (p.description) line += `: ${p.description}`;
+          if (p.url) line += ` [${p.url}]`;
+          return line;
+        })
+        .join("\n") +
+      "\n";
+
+    return text;
+  });
+
+  wireExport("exportCriteriaBtn", "criteriaExportStatus", "search-criteria.txt", async () => {
+    const list = await api("/api/criteria");
+    let text = exportHeader("SAVED SEARCH CRITERIA");
+    list.forEach((c, i) => {
+      text += `${i + 1}. ${c.label}\n`;
+      if (c.keywords) text += `   Keywords: ${c.keywords}\n`;
+      if (c.target_roles) text += `   Target roles: ${c.target_roles}\n`;
+      if (c.industries) text += `   Industries: ${c.industries}\n`;
+      if (c.locations) text += `   Locations: ${c.locations}\n`;
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportJobSearchBtn", "jobSearchExportStatus", "job-search-results.txt", () => {
+    if (!lastJobSearchResults) return "";
+    let text = exportHeader("JOB SEARCH RESULTS");
+    if (lastJobSearchResults.warnings && lastJobSearchResults.warnings.length) {
+      text += `Warnings: ${lastJobSearchResults.warnings.join(" ")}\n\n`;
+    }
+    lastJobSearchResults.results.forEach((r, i) => {
+      text += `${i + 1}. ${r.title} — Score ${r.score}\n`;
+      text += `   Company: ${r.company || "-"}\n`;
+      text += `   Location: ${r.location || "-"}\n`;
+      text += `   Source: ${r.source || "-"}\n`;
+      const matched = [...(r.matched_skills || []), ...(r.matched_keywords || [])];
+      if (matched.length) text += `   Matched: ${matched.join(", ")}\n`;
+      if (r.url) text += `   URL: ${r.url}\n`;
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportManualListingsBtn", "manualListingsExportStatus", "manual-listings.txt", async () => {
+    const list = await api("/api/jobs/manual");
+    let text = exportHeader("MANUAL LISTINGS");
+    list.forEach((l, i) => {
+      text += `${i + 1}. ${l.title}\n`;
+      text += `   Company: ${l.company || "-"}\n`;
+      text += `   Location: ${l.location || "-"}\n`;
+      if (l.url) text += `   URL: ${l.url}\n`;
+      if (l.description) text += `   Description: ${l.description}\n`;
+      if (l.notes) text += `   Notes: ${l.notes}\n`;
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportContactsBtn", "contactsExportStatus", "contacts.txt", async () => {
+    const list = await api("/api/contacts");
+    let text = exportHeader("CONTACTS");
+    list.forEach((c, i) => {
+      text += `${i + 1}. ${c.name}\n`;
+      if (c.company) text += `   Company: ${c.company}\n`;
+      if (c.linkedin_url) text += `   LinkedIn: ${c.linkedin_url}\n`;
+      if (c.email) text += `   Email: ${c.email}\n`;
+      if (c.phone) text += `   Phone: ${c.phone}\n`;
+      text += `   Status: ${(c.status || "").replace("_", " ")}\n`;
+      if (c.notes) text += `   Notes: ${c.notes}\n`;
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportLeadsBtn", "leadsExportStatus", "job-leads.txt", async () => {
+    const list = await api("/api/leads");
+    let text = exportHeader("JOB LEADS");
+    list.forEach((l, i) => {
+      text += `${i + 1}. ${l.company || "(unknown company)"}\n`;
+      if (l.job_url) text += `   URL: ${l.job_url}\n`;
+      if (l.recruiter_name) text += `   Recruiter: ${l.recruiter_name}\n`;
+      text += `   Status: ${(l.status || "").replace("_", " ")}\n`;
+      if (l.notes) text += `   Notes: ${l.notes}\n`;
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportCvsBtn", "cvExportStatus", "cv-ats-summary.txt", async () => {
+    const list = await api("/api/cv");
+    let text = exportHeader("CV & ATS SUMMARY");
+    for (const cv of list) {
+      text += `${cv.original_filename}${cv.is_active ? " (active)" : ""}\n`;
+      text += `   Type: ${cv.file_type.toUpperCase()}, uploaded ${new Date(cv.uploaded_at).toLocaleString()}\n`;
+      try {
+        const report = await api(`/api/cv/${cv.id}/ats-report`);
+        text += `   ATS score: ${report.overall_score}/100\n`;
+        text += `   Summary: ${report.summary}\n`;
+      } catch (e) {
+        text += `   ATS report unavailable.\n`;
+      }
+      text += "\n";
+    }
+    return text;
+  });
+
+  wireExport("exportTargetJobsBtn", "targetJobsExportStatus", "target-jobs.txt", async () => {
+    const list = await api("/api/target-jobs");
+    let text = exportHeader("TARGET JOBS");
+    list.forEach((j, i) => {
+      text += `${i + 1}. ${j.title || "(untitled)"}\n`;
+      text += `   ${[j.company, j.location, j.source_type, j.fetch_status].filter(Boolean).join(" · ")}\n`;
+      if (j.fetch_warning) text += `   Warning: ${j.fetch_warning}\n`;
+      if (j.source_url) text += `   Source URL: ${j.source_url}\n`;
+      if (j.jd_text) text += `   Description:\n     ${j.jd_text.replace(/\n/g, "\n     ")}\n`;
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportTailoringBtn", "tailoringExportStatus", "cv-tailoring-analysis.txt", () => {
+    if (!lastTailoringReport) return "";
+    const r = lastTailoringReport;
+    let text = exportHeader("CV TAILORING ANALYSIS");
+    text += `Match score: ${r.match_score}%\n`;
+    if (r.key_skills_line) text += `Key skills line: ${r.key_skills_line}\n`;
+    text += "\nMATCHED KEYWORDS\n";
+    (r.matched_keywords || []).forEach((m) => {
+      text += `- ${m.keyword} (found in: ${(m.cv_sections || []).join(", ")})\n`;
+    });
+    text += "\nMISSING KEYWORDS (suggested gaps)\n";
+    (r.missing_keywords || []).forEach((m) => {
+      text += `- ${m.keyword}\n`;
+    });
+    return text;
+  });
+
+  wireExport("exportSimilarCompaniesBtn", "similarCompaniesExportStatus", "similar-companies.txt", () => {
+    if (!lastSimilarCompanies.length) return "";
+    let text = exportHeader("SIMILAR COMPANIES & POSITIONS");
+    lastSimilarCompanies.forEach((c, i) => {
+      text += `${i + 1}. ${c.name || "(unnamed company)"}\n`;
+      text += `   ${[c.industry, c.location, c.employee_count ? c.employee_count + " employees" : null].filter(Boolean).join(" · ")}\n`;
+      if (c.postings === null) {
+        text += `   Open postings: not loaded yet -- click "View job postings" first\n`;
+      } else if (!c.postings.length) {
+        text += `   Open postings: none found via Apollo\n`;
+      } else {
+        text += `   Open postings:\n`;
+        c.postings.forEach((p) => {
+          text += `     - ${p.title || "(untitled role)"}${p.location ? " (" + p.location + ")" : ""}${p.url ? " " + p.url : ""}\n`;
+        });
+      }
+      text += "\n";
+    });
+    return text;
+  });
+
+  wireExport("exportSalaryBtn", "salaryExportStatus", "salary-estimates.txt", async () => {
+    const list = await api("/api/salary/estimates");
+    let text = exportHeader("PAST SALARY ESTIMATES");
+    list.forEach((e, i) => {
+      text += `${i + 1}. ${e.role_query} — ${e.location_query || "(no location)"}\n`;
+      if (e.ctc_low !== null && e.ctc_low !== undefined) {
+        text += `   CTC range: ₹${formatINR(e.ctc_low)} – ₹${formatINR(e.ctc_high)} (median ~₹${formatINR(e.ctc_median)})\n`;
+        text += `   In-hand range: ₹${formatINR(e.inhand_low)} – ₹${formatINR(e.inhand_high)}\n`;
+      }
+      text += `   Date: ${new Date(e.created_at).toLocaleDateString()}\n\n`;
+    });
+    return text;
   });
 
   // ---- Init ----
