@@ -15,6 +15,7 @@ def _resolve(path_str: str) -> Path:
 ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "").strip()
 ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "").strip()
 APOLLO_API_KEY = os.environ.get("APOLLO_API_KEY", "").strip()
+APIFY_API_TOKEN = os.environ.get("APIFY_API_TOKEN", "").strip()
 
 PORT = int(os.environ.get("PORT", "8000"))
 DB_PATH = _resolve(os.environ.get("DB_PATH", "./data/job_search.db"))
@@ -41,6 +42,9 @@ SALARY_MIN_HISTOGRAM_BUCKETS = 3
 
 ADZUNA_CACHE_TTL_SECONDS = 600
 APOLLO_CACHE_TTL_SECONDS = 600
+APIFY_CACHE_TTL_SECONDS = 600
+APIFY_RUN_TIMEOUT_SECONDS = 90
+APIFY_MAX_ITEMS_PER_SOURCE = 15
 
 
 def ensure_data_dirs() -> None:

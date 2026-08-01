@@ -3,8 +3,8 @@
 This is a local, single-user tool for a job search in India. Everything runs on your own
 machine; nothing about your profile, CV, or contacts is sent anywhere except the specific
 outbound calls described below (Adzuna's API, Apollo's company/job-postings API if
-configured, and a single fetch of a URL you paste in yourself). This manual walks through
-every tab.
+configured, Apify's job-search Actors if configured, and a single fetch of a URL you paste
+in yourself). This manual walks through every tab.
 
 ## 1. First-time setup
 
@@ -26,7 +26,17 @@ every tab.
    ```
    Without it, those features just show a clear "not configured" message. See the note in
    section 4 about exactly what this app does and doesn't use Apollo for.
-4. Start the app (`uvicorn app.main:app --reload --port 8000`) and open
+4. Optionally, add an Apify API token (Apify Console → Settings → Integrations) to enable
+   live job-listing search via Apify's hosted scraper Actors for Google Jobs, Naukri, Indeed
+   India, and LinkedIn Jobs:
+   ```
+   APIFY_API_TOKEN=your-apify-api-token
+   ```
+   Without it, Job Search just runs without this source, same as an unconfigured Adzuna/Apollo.
+   These Actors are paid per run on your Apify account — each Job Search click with this
+   configured triggers one run per site, routed through Apify's own proxy infrastructure, not
+   your machine. See the note in section 4 for exactly what this covers (and doesn't).
+5. Start the app (`uvicorn app.main:app --reload --port 8000`) and open
    http://localhost:8000.
 
 ## 2. Profile tab
@@ -59,12 +69,15 @@ button so you can update it later without deleting and re-creating it.
 ## 4. Job Search tab
 
 Pick a saved criteria set (or leave it on "ad hoc" to search with no filter) and click
-**Search**. Results are pulled from up to three places and merged into one ranked list:
+**Search**. Results are pulled from up to four places and merged into one ranked list:
 
 - **Adzuna's live India job index** (if configured) — broad keyword/location search.
 - **Apollo's company + job-postings data** (if configured) — for criteria with an
   "Industries" value set, searches companies matching that industry and lists their open
   roles via Apollo. This runs alongside Adzuna even when results overlap.
+- **Apify's job-search Actors** (if configured) — live listings scraped from Google Jobs,
+  Naukri, Indeed India, and LinkedIn Jobs, run through Apify's hosted infrastructure. All four
+  run at once and merge in, same as the other sources.
 - **Manual Listings** you've added yourself (see below).
 
 Each result shows a score and the specific skills/keywords/role/location that matched — this
@@ -78,6 +91,14 @@ this app calls Apollo's (or any other service's) people-search, contact, or emai
 endpoints, and Hunter.io isn't integrated at all (it has no job-listing data — it's purely an
 email-finding tool, which is out of scope for this project). If you're extending this code,
 keep it that way.
+
+**On the Apify job-search Actors:** earlier versions of this project explicitly declined
+automated scraping of LinkedIn or other job sites (see `app/apify_client.py`'s docstring and
+root `CLAUDE.md`). That was reversed deliberately for this one thing — public job-*listing*
+data (title, company, location, salary, apply link), routed through Apify's own proxy
+infrastructure rather than this app scraping these sites directly. It still never touches
+personal/contact data, logs into anything, or scrapes LinkedIn profiles — only public job
+search-results pages. Keep it scoped that way if you extend it.
 
 ## 5. Manual Listings tab
 
