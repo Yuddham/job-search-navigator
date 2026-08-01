@@ -375,7 +375,7 @@ button:hover, .secondary-btn:hover { background: var(--chip-bg); }
 
 .signature {
   font-family: "Dancing Script", cursive;
-  font-size: 1.4rem;
+  font-size: 0.8rem;
   text-align: right;
   color: var(--text-muted);
   margin: 0.5rem 0.25rem 0;
