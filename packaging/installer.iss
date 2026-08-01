@@ -4,13 +4,15 @@
 ; (run packaging\navigrad.spec first).
 
 #define MyAppName "Navigrad"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppExeName "Navigrad.exe"
+#define MyAppPublisher "Nil J"
 
 [Setup]
 AppId={{6E9B6B7A-6A9B-4F2C-9C1E-2B3A7E9C4D1F}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}

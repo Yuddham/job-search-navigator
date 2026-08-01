@@ -13,10 +13,18 @@ Keep it scoped to public job listings only.
 Four Actors, one per source, each called via Apify's run-sync-get-dataset-items
 endpoint (one HTTP call runs the Actor to completion and returns its results --
 no separate polling loop needed):
-  - Google Jobs search   (gio21/google-jobs-scraper)
+  - Google Jobs search   (crw/google-jobs-scraper)
   - Naukri.com           (muhammetakkurtt/naukri-job-scraper)
   - Indeed India         (kaix/indeed-scraper)
   - LinkedIn Jobs search (curious_coder/linkedin-jobs-scraper)
+
+Note on actor churn: the original Google Jobs actor (gio21/google-jobs-scraper)
+was swapped out after its maintainer gated real results behind a paid Apify
+plan -- it started silently returning fabricated placeholder listings
+(_mock: true) instead of erroring, which this app must never pass off as real
+data. If a future actor swap is needed, verify with a live test call first
+(check for a "_mock"/similar flag or obviously fake company/URL data) rather
+than trusting a 200 response alone.
 """
 import json
 import time
@@ -29,12 +37,13 @@ from app import config
 
 BASE_URL = "https://api.apify.com/v2"
 
-GOOGLE_JOBS_ACTOR = "gio21/google-jobs-scraper"
+GOOGLE_JOBS_ACTOR = "crw/google-jobs-scraper"
 NAUKRI_ACTOR = "muhammetakkurtt/naukri-job-scraper"
 INDEED_ACTOR = "kaix/indeed-scraper"
 LINKEDIN_JOBS_ACTOR = "curious_coder/linkedin-jobs-scraper"
 
 NAUKRI_MIN_JOBS = 50  # the Actor itself rejects maxJobs below this
+GOOGLE_JOBS_MIN_ITEMS = 10  # the Actor itself rejects maxResults below this
 
 
 class ApifyConfigError(Exception):
@@ -127,19 +136,31 @@ def _run_actor_sync(actor: str, run_input: dict[str, Any]) -> list[dict]:
     if not isinstance(items, list):
         items = []
 
+    # Some Actors degrade to fabricated placeholder data (flagged "_mock")
+    # instead of erroring, e.g. when the caller's Apify plan doesn't cover a
+    # premium unblocking backend -- surface that as a real failure rather
+    # than silently presenting fake listings as genuine search results.
+    if any(isinstance(it, dict) and it.get("_mock") for it in items):
+        notice = next((it.get("_notice") for it in items if isinstance(it, dict) and it.get("_notice")), None)
+        raise ApifyAPIError(
+            f"Apify returned mock/sample data for {actor} instead of real results"
+            + (f": {notice}" if notice else " (the Actor may require a higher Apify plan).")
+        )
+
     _cache[key] = (now, items)
     return items
 
 
 def search_google_jobs(keyword: str, location: str = "", max_items: Optional[int] = None) -> list[dict]:
+    # This actor manages its own sessions/proxies internally (no proxyConfiguration
+    # input) -- "no API key or cookies required" per its own description.
     run_input: dict[str, Any] = {
-        "queries": [keyword] if keyword else ["jobs"],
-        "location": location,
-        "countryCode": "in",
-        "languageCode": "en",
-        "maxItems": max_items or config.APIFY_MAX_ITEMS_PER_SOURCE,
+        "keyword": keyword or "jobs",
+        "location": location or "India",
+        "maxResults": max(max_items or config.APIFY_MAX_ITEMS_PER_SOURCE, GOOGLE_JOBS_MIN_ITEMS),
+        "gl": "in",
+        "hl": "en",
         "datePosted": "week",
-        "proxyConfiguration": {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]},
     }
     items = _run_actor_sync(GOOGLE_JOBS_ACTOR, run_input)
 
@@ -147,19 +168,20 @@ def search_google_jobs(keyword: str, location: str = "", max_items: Optional[int
     for it in items:
         if not isinstance(it, dict) or not it.get("title"):
             continue
-        apply_opts = it.get("applyOptions") or []
+        apply_links = it.get("applyLink") or []
+        first_link = apply_links[0].get("link") if apply_links else None
         results.append({
             "source": "google_jobs",
-            "external_id": it.get("jobId"),
+            "external_id": first_link,
             "title": it.get("title") or "",
             "company": it.get("companyName"),
             "location": it.get("location"),
             "description": it.get("description"),
-            "url": it.get("url") or (apply_opts[0].get("url") if apply_opts else None),
-            "salary_min": it.get("salaryMin"),
-            "salary_max": it.get("salaryMax"),
-            "category": None,
-            "posted_at": it.get("postedAtIso") or it.get("postedAt"),
+            "url": first_link,
+            "salary_min": None,
+            "salary_max": None,
+            "category": _get_path(it, "metadata.scheduleType"),
+            "posted_at": _get_path(it, "metadata.postedAt"),
         })
     return results
 
