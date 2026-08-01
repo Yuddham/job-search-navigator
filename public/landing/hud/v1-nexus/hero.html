@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pearl: #f4f5f7;
+    --grey-light: #e8e9ec;
+    --grey-cool: #d9dce1;
+    --graphite: #1b1f24;
+    --slate: #2c3137;
+    --white: #ffffff;
+    --silver: #c8cdd4;
+    --line: rgba(27, 31, 36, 0.14);
+    --line-strong: rgba(27, 31, 36, 0.32);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(180deg, var(--pearl) 0%, var(--grey-light) 100%);
+    color: var(--graphite);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    isolation: isolate;
+  }
+  /* corner brackets */
+  .bracket { position: absolute; width: 22px; height: 22px; border-color: var(--line-strong); z-index: 5; }
+  .bracket.tl { top: 3vh; left: 2.5vw; border-top: 1px solid; border-left: 1px solid; }
+  .bracket.tr { top: 3vh; right: 2.5vw; border-top: 1px solid; border-right: 1px solid; }
+  .bracket.bl { bottom: 3vh; left: 2.5vw; border-bottom: 1px solid; border-left: 1px solid; }
+  .bracket.br { bottom: 3vh; right: 2.5vw; border-bottom: 1px solid; border-right: 1px solid; }
+
+  .topbar, .bottombar {
+    position: absolute; left: 4vw; right: 4vw;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--slate); opacity: 0.55; z-index: 5;
+  }
+  .topbar { top: 3.4vh; }
+  .bottombar { bottom: 3.4vh; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+  .bottombar span + span::before { content: "·"; margin: 0 0.6em; opacity: 0.6; }
+
+  .graph-wrap {
+    position: absolute; top: 0; right: 0; width: 62vw; height: 100vh;
+    z-index: 1;
+  }
+  #graph { width: 100%; height: 100%; }
+  .rotor { transform-origin: 50% 50%; animation: rotor-spin 260s linear infinite; }
+  @keyframes rotor-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .hub { animation: breathe 9s ease-in-out infinite; }
+  .hub:nth-child(2n) { animation-duration: 11s; animation-delay: -3s; }
+  .hub:nth-child(3n) { animation-duration: 13s; animation-delay: -6s; }
+  @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.85; } }
+  .scan-ring { animation: dash-drift 90s linear infinite; transform-origin: 50% 50%; }
+  @keyframes dash-drift { to { transform: rotate(-360deg); } }
+
+  .content { position: absolute; top: 0; left: 0; height: 100vh; width: 46vw;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 5vw; z-index: 3; }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.7;
+    margin-bottom: 1.6rem;
+  }
+  .kicker::before { content: "// "; opacity: 0.5; }
+
+  h1 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    color: var(--graphite);
+    margin-bottom: 1.3rem;
+    max-width: 11.5ch;
+  }
+  .subhead {
+    font-size: 0.98rem; line-height: 1.7; font-weight: 300;
+    color: var(--slate); opacity: 0.8; max-width: 40ch;
+    margin-bottom: 2.2rem;
+  }
+  .cta-row { display: flex; align-items: center; gap: 1.4rem; }
+  .cta {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--graphite); color: var(--white);
+    border: none; padding: 0.85rem 1.5rem;
+    cursor: pointer;
+  }
+  .rule { width: 50px; height: 1px; background: var(--line-strong); }
+  .tag { margin-top: 3rem; font-family: "IBM Plex Mono", monospace; font-size: 0.68rem;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--slate); opacity: 0.5; }
+  .tag b { color: var(--graphite); opacity: 1; font-weight: 500; }
+
+  .coord { position: absolute; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem;
+    color: var(--slate); opacity: 0.4; letter-spacing: 0.06em; z-index: 4; }
+  .coord.a { top: 10vh; right: 3vw; }
+  .coord.b { bottom: 14vh; right: 4vw; text-align: right; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="topbar">
+    <span>JOB-SEARCH-NAVIGATOR // INTELLIGENCE LAYER</span>
+    <span>OBJ.01 — PROFILE.GRAPH</span>
+  </div>
+
+  <div class="coord a">N 12.9716° · E 77.5946°</div>
+  <div class="coord b">RENDER 04 · REV C</div>
+
+  <div class="graph-wrap">
+    <svg id="graph" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="content">
+    <div class="kicker">For job seekers in India</div>
+    <h1>Your job search, modeled as a system.</h1>
+    <p class="subhead">Rank live listings against your LinkedIn profile, run a deterministic ATS check, and track every application — computed locally, nothing sent to the cloud.</p>
+    <div class="cta-row">
+      <button class="cta">See how it works</button>
+      <div class="rule"></div>
+    </div>
+    <div class="tag">SYS.V1 — <b>NEXUS</b> · FORCE-DIRECTED KNOWLEDGE GRAPH</div>
+  </div>
+
+  <div class="bottombar">
+    <span>GRAPH: PROFILE ↔ LISTINGS</span>
+    <span>NODES 128</span>
+    <span>EDGES 342</span>
+    <span>STATUS: LIVE</span>
+  </div>
+</section>
+
+<script>
+(function () {
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var rand = mulberry32(1337);
+  var svg = document.getElementById('graph');
+  var NS = 'http://www.w3.org/2000/svg';
+  var W = 900, H = 900, cx = 450, cy = 450;
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  var rotor = el('g', { class: 'rotor' });
+  svg.appendChild(rotor);
+
+  // dotted bounding circumference (scan ring)
+  rotor.appendChild(el('circle', {
+    class: 'scan-ring', cx: cx, cy: cy, r: 340,
+    fill: 'none', stroke: 'rgba(27,31,36,0.28)', 'stroke-width': 1,
+    'stroke-dasharray': '1 7'
+  }));
+  rotor.appendChild(el('circle', {
+    cx: cx, cy: cy, r: 300,
+    fill: 'none', stroke: 'rgba(27,31,36,0.10)', 'stroke-width': 1
+  }));
+
+  // cluster centers
+  var clusters = [
+    { x: 300, y: 320, r: 90, n: 26 },
+    { x: 560, y: 260, r: 70, n: 20 },
+    { x: 480, y: 560, r: 100, n: 30 },
+    { x: 260, y: 600, r: 60, n: 16 }
+  ];
+
+  var points = [];
+  clusters.forEach(function (c, ci) {
+    // translucent hub disc behind each cluster
+    rotor.appendChild(el('circle', {
+      class: 'hub', cx: c.x, cy: c.y, r: c.r,
+      fill: 'rgba(27,31,36,0.045)', stroke: 'rgba(27,31,36,0.14)', 'stroke-width': 1
+    }));
+    for (var i = 0; i < c.n; i++) {
+      var ang = rand() * Math.PI * 2;
+      var rad = Math.pow(rand(), 0.6) * c.r;
+      var x = c.x + Math.cos(ang) * rad;
+      var y = c.y + Math.sin(ang) * rad;
+      points.push({ x: x, y: y, cluster: ci });
+    }
+  });
+
+  // edges within threshold distance
+  var edgeGroup = el('g', {});
+  rotor.insertBefore(edgeGroup, rotor.firstChild);
+  for (var i = 0; i < points.length; i++) {
+    for (var j = i + 1; j < points.length; j++) {
+      var dx = points[i].x - points[j].x, dy = points[i].y - points[j].y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 55) {
+        var op = (1 - d / 55) * 0.35;
+        edgeGroup.appendChild(el('line', {
+          x1: points[i].x, y1: points[i].y, x2: points[j].x, y2: points[j].y,
+          stroke: 'rgba(27,31,36,' + op.toFixed(2) + ')', 'stroke-width': 0.6
+        }));
+      }
+    }
+  }
+
+  // cross-cluster bridge edges (a few, longer, fainter)
+  for (var b = 0; b < 14; b++) {
+    var p1 = points[Math.floor(rand() * points.length)];
+    var p2 = points[Math.floor(rand() * points.length)];
+    edgeGroup.appendChild(el('line', {
+      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+      stroke: 'rgba(27,31,36,0.08)', 'stroke-width': 0.5
+    }));
+  }
+
+  // node dots
+  points.forEach(function (p, idx) {
+    var isHub = idx % 11 === 0;
+    rotor.appendChild(el('circle', {
+      cx: p.x, cy: p.y, r: isHub ? 4.2 : 1.6 + rand() * 1.2,
+      fill: isHub ? 'rgba(27,31,36,0.85)' : 'rgba(27,31,36,0.55)'
+    }));
+  });
+
+  // a couple of tick marks + micro labels near the ring
+  [30, 140, 245].forEach(function (deg) {
+    var rad = deg * Math.PI / 180;
+    var x1 = cx + Math.cos(rad) * 340, y1 = cy + Math.sin(rad) * 340;
+    var x2 = cx + Math.cos(rad) * 352, y2 = cy + Math.sin(rad) * 352;
+    rotor.appendChild(el('line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: 'rgba(27,31,36,0.4)', 'stroke-width': 1 }));
+  });
+})();
+</script>
+</body>
+</html>

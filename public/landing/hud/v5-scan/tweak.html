@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design Tweaks — Scan — Job Search Navigator</title>
+<style>
+  :root {
+    --p-bg: #ffffff; --p-ink: #1a1a1a; --p-muted: #6b6b6b; --p-border: #e5e5e5;
+    --p-chip: #f2f2f4; --p-accent: #1a1a1a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--p-ink);
+    overflow: hidden;
+  }
+  .stage { flex: 1; height: 100%; background: #000; }
+  .stage iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+  .panel {
+    width: 400px; flex-shrink: 0; height: 100%; overflow-y: auto;
+    border-left: 1px solid var(--p-border); background: var(--p-bg);
+    padding: 1.1rem 1.2rem 6.5rem;
+  }
+  .panel h1 { font-size: 1rem; margin: 0 0 0.15rem; }
+  .panel .sub { font-size: 0.78rem; color: var(--p-muted); margin: 0 0 1rem; line-height: 1.4; }
+  .panel .back { font-size: 0.76rem; color: var(--p-muted); }
+
+  fieldset {
+    border: 1px solid var(--p-border); border-radius: 8px;
+    margin: 0 0 1rem; padding: 0.7rem 0.85rem 0.9rem;
+  }
+  legend {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--p-muted); padding: 0 0.3rem;
+  }
+
+  .row { margin-bottom: 0.7rem; }
+  .row:last-child { margin-bottom: 0; }
+  .row-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.8rem; margin-bottom: 0.25rem;
+  }
+  .row-label .val { font-size: 0.72rem; color: var(--p-muted); font-variant-numeric: tabular-nums; }
+
+  input[type="range"] { width: 100%; accent-color: var(--p-accent); }
+  input[type="color"] {
+    width: 100%; height: 28px; border: 1px solid var(--p-border); border-radius: 6px;
+    padding: 0; cursor: pointer; background: none;
+  }
+  select {
+    width: 100%; padding: 0.4rem 0.5rem; border: 1px solid var(--p-border);
+    border-radius: 6px; font-size: 0.82rem; background: #fff; color: var(--p-ink);
+  }
+  .checkbox-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+
+  .actions {
+    position: fixed; right: 0; bottom: 0; width: 400px;
+    background: var(--p-bg); border-left: 1px solid var(--p-border);
+    border-top: 1px solid var(--p-border);
+    padding: 0.75rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .actions-row { display: flex; gap: 0.5rem; }
+  button {
+    border: 1px solid var(--p-border); background: #fff; color: var(--p-ink);
+    padding: 0.55rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.82rem; flex: 1;
+  }
+  button:hover { background: var(--p-chip); }
+  button.primary { background: var(--p-accent); color: #fff; border-color: var(--p-accent); flex: 2; }
+  button.primary:hover { opacity: 0.88; }
+  .status { font-size: 0.76rem; min-height: 1.1em; color: var(--p-muted); }
+  .status.ok { color: #1a7f37; }
+  .status.err { color: #b3261e; }
+</style>
+</head>
+<body>
+  <div class="stage"><iframe id="stage" src="hero.html" title="Hero preview"></iframe></div>
+
+  <aside class="panel">
+    <h1>Design Tweaks — v5 Scan</h1>
+    <p class="sub">
+      Drag anything below to see it change live in the preview. Nothing here touches the
+      running app until you click <strong>Save &amp; Implement</strong>.<br />
+      <a class="back" href="index.html">&larr; back to the 5-way comparison</a>
+    </p>
+
+    <fieldset><legend>Typography</legend><div id="g-typography"></div></fieldset>
+    <fieldset><legend>Color</legend><div id="g-color"></div></fieldset>
+    <fieldset><legend>Spacing</legend><div id="g-spacing"></div></fieldset>
+    <fieldset><legend>Motion</legend><div id="g-motion"></div></fieldset>
+    <fieldset><legend>Signal visualization</legend><div id="g-viz"></div></fieldset>
+    <fieldset><legend>Chrome</legend><div id="g-chrome"></div></fieldset>
+
+    <div class="actions">
+      <div class="status" id="status"></div>
+      <div class="actions-row">
+        <button id="resetBtn">Reset</button>
+        <button id="downloadBtn">Download .json</button>
+      </div>
+      <div class="actions-row">
+        <button id="saveBtn" class="primary">Save &amp; Implement in Job Search Navigator</button>
+      </div>
+    </div>
+  </aside>
+
+<script>
+(function () {
+  var DISPLAY_FONTS = [
+    ['Space Grotesk', '"Space Grotesk", sans-serif'],
+    ['Inter', '"Inter", sans-serif'],
+    ['IBM Plex Sans', '"IBM Plex Sans", sans-serif'],
+    ['DM Sans', '"DM Sans", sans-serif'],
+    ['Sora', '"Sora", sans-serif'],
+    ['Archivo', '"Archivo", sans-serif']
+  ];
+  var MONO_FONTS = [
+    ['IBM Plex Mono', '"IBM Plex Mono", monospace'],
+    ['JetBrains Mono', '"JetBrains Mono", monospace']
+  ];
+  var BODY_FONTS = DISPLAY_FONTS;
+  var WEIGHTS = [['300 Light', '300'], ['400 Regular', '400'], ['500 Medium', '500'], ['600 Semibold', '600'], ['700 Bold', '700']];
+
+  function opts(list) {
+    return list.map(function (p) { return { label: p[0], value: p[1] }; });
+  }
+
+  var CONTROLS = [
+    { id: 'font-display', group: 'typography', label: 'Display / headline font', type: 'select', varName: '--font-display', options: opts(DISPLAY_FONTS), def: '"Space Grotesk", sans-serif' },
+    { id: 'font-mono', group: 'typography', label: 'Technical / mono font', type: 'select', varName: '--font-mono', options: opts(MONO_FONTS), def: '"IBM Plex Mono", monospace' },
+    { id: 'font-body', group: 'typography', label: 'Body font', type: 'select', varName: '--font-body', options: opts(BODY_FONTS), def: '"IBM Plex Sans", sans-serif' },
+    { id: 'h1-weight', group: 'typography', label: 'Headline weight', type: 'select', varName: '--h1-weight', options: opts(WEIGHTS), def: '400' },
+    { id: 'h1-size', group: 'typography', label: 'Headline size', type: 'range', varName: '--h1-size-mult', min: 0.7, max: 1.5, step: 0.05, def: 1, unit: '' },
+    { id: 'h1-tracking', group: 'typography', label: 'Headline letter-spacing', type: 'range', varName: '--h1-tracking', min: -0.04, max: 0.02, step: 0.005, def: -0.01, unit: 'em' },
+    { id: 'body-size', group: 'typography', label: 'Body size', type: 'range', varName: '--body-size-mult', min: 0.7, max: 1.4, step: 0.05, def: 1, unit: '' },
+    { id: 'label-tracking', group: 'typography', label: 'Label letter-spacing', type: 'range', varName: '--label-tracking', min: 0, max: 0.3, step: 0.01, def: 0.18, unit: 'em' },
+    { id: 'label-size', group: 'typography', label: 'Label size', type: 'range', varName: '--label-size-mult', min: 0.7, max: 1.5, step: 0.05, def: 1, unit: '' },
+
+    { id: 'c-bg-1', group: 'color', label: 'Background (top)', type: 'color', varName: '--c-bg-1', def: '#f4f5f7' },
+    { id: 'c-bg-2', group: 'color', label: 'Background (bottom)', type: 'color', varName: '--c-bg-2', def: '#e8e9ec' },
+    { id: 'c-ink', group: 'color', label: 'Ink (primary text / lines)', type: 'color', varName: '--c-ink', def: '#1b1f24' },
+    { id: 'c-slate', group: 'color', label: 'Slate (secondary text)', type: 'color', varName: '--c-slate', def: '#2c3137' },
+    { id: 'c-accent', group: 'color', label: 'Accent (CTA / hub / blips)', type: 'color', varName: '--c-accent', def: '#b3421f' },
+    { id: 'c-accent-contrast', group: 'color', label: 'Accent contrast (text on accent)', type: 'color', varName: '--c-accent-contrast', def: '#ffffff' },
+    { id: 'line-strength', group: 'color', label: 'Line strength', type: 'range', varName: '--line-strength', min: 4, max: 40, step: 1, def: 14, unit: '%' },
+    { id: 'line-strong-strength', group: 'color', label: 'Strong line strength', type: 'range', varName: '--line-strong-strength', min: 10, max: 60, step: 1, def: 32, unit: '%' },
+
+    { id: 'content-pad-x', group: 'spacing', label: 'Content padding (x)', type: 'range', varName: '--content-pad-x', min: 2, max: 10, step: 0.5, def: 5, unit: 'vw' },
+    { id: 'content-width', group: 'spacing', label: 'Content panel width', type: 'range', varName: '--content-width', min: 30, max: 55, step: 1, def: 42, unit: 'vw' },
+    { id: 'rhythm', group: 'spacing', label: 'Vertical rhythm', type: 'range', varName: '--rhythm-mult', min: 0.5, max: 2, step: 0.05, def: 1, unit: '' },
+    { id: 'bracket-size', group: 'spacing', label: 'Corner bracket size', type: 'range', varName: '--bracket-size', min: 12, max: 40, step: 1, def: 22, unit: 'px' },
+    { id: 'bracket-inset-x', group: 'spacing', label: 'Bracket inset (x)', type: 'range', varName: '--bracket-inset-x', min: 1, max: 6, step: 0.25, def: 2.5, unit: 'vw' },
+    { id: 'bracket-inset-y', group: 'spacing', label: 'Bracket inset (y)', type: 'range', varName: '--bracket-inset-y', min: 1, max: 8, step: 0.25, def: 3, unit: 'vh' },
+
+    { id: 'motion-enabled', group: 'motion', label: 'Motion enabled', type: 'checkbox', def: true },
+    { id: 'reveal-distance', group: 'motion', label: 'Reveal distance', type: 'range', varName: '--reveal-distance', min: 0, max: 80, step: 2, def: 22, unit: 'px' },
+    { id: 'reveal-duration', group: 'motion', label: 'Reveal duration', type: 'range', varName: '--reveal-duration', min: 200, max: 1600, step: 50, def: 700, unit: 'ms' },
+    { id: 'reveal-stagger', group: 'motion', label: 'Reveal stagger', type: 'range', varName: '--reveal-stagger', min: 0, max: 300, step: 10, def: 90, unit: 'ms' },
+    { id: 'sweep-duration', group: 'motion', label: 'Sweep-arc speed', type: 'range', varName: '--sweep-duration', min: 6, max: 60, step: 1, def: 22, unit: 's' },
+    { id: 'ping-duration', group: 'motion', label: 'Ping-ring speed', type: 'range', varName: '--ping-duration', min: 2, max: 14, step: 0.5, def: 6, unit: 's' },
+    { id: 'blip-duration', group: 'motion', label: 'Blip pulse speed', type: 'range', varName: '--blip-duration', min: 2, max: 12, step: 0.5, def: 5, unit: 's' },
+    { id: 'ring-drift-duration', group: 'motion', label: 'Dotted-ring drift speed', type: 'range', varName: '--ring-drift-duration', min: 20, max: 240, step: 5, def: 100, unit: 's' },
+
+    { id: 'density', group: 'viz', label: 'Signal density (rings + blips)', type: 'range', min: 1, max: 3, step: 1, def: 3, unit: '' },
+    { id: 'ring-strength', group: 'viz', label: 'Ring opacity', type: 'range', varName: '--ring-strength', min: 4, max: 40, step: 1, def: 12, unit: '%' },
+    { id: 'ring-strong-strength', group: 'viz', label: 'Outer ring opacity', type: 'range', varName: '--ring-strong-strength', min: 10, max: 60, step: 1, def: 30, unit: '%' },
+    { id: 'dotted-strength', group: 'viz', label: 'Dotted-ring opacity', type: 'range', varName: '--dotted-strength', min: 5, max: 50, step: 1, def: 20, unit: '%' },
+    { id: 'sweep-fill-strength', group: 'viz', label: 'Sweep-arc fill opacity', type: 'range', varName: '--sweep-fill-strength', min: 2, max: 25, step: 1, def: 6, unit: '%' },
+
+    { id: 'radius', group: 'chrome', label: 'Corner radius', type: 'range', varName: '--radius', min: 0, max: 16, step: 1, def: 0, unit: 'px' },
+    { id: 'cta-style', group: 'chrome', label: 'CTA button style', type: 'select', options: [{ label: 'Filled', value: 'filled' }, { label: 'Outline', value: 'outline' }], def: 'filled' }
+  ];
+
+  var state = {};
+  CONTROLS.forEach(function (c) { state[c.id] = c.def; });
+
+  var frame = document.getElementById('stage');
+  var statusEl = document.getElementById('status');
+
+  function fmt(ctrl, v) {
+    if (ctrl.type === 'range') return (Math.round(v * 1000) / 1000) + (ctrl.unit || '');
+    return String(v);
+  }
+
+  function applyOne(ctrl, value) {
+    var doc = frame.contentDocument;
+    if (!doc) return;
+    var root = doc.documentElement;
+    if (ctrl.varName) {
+      var cssVal = ctrl.type === 'range' ? (value + (ctrl.unit || '')) : value;
+      root.style.setProperty(ctrl.varName, cssVal);
+      return;
+    }
+    if (ctrl.id === 'motion-enabled') {
+      root.classList.toggle('no-motion', !value);
+    } else if (ctrl.id === 'density') {
+      root.setAttribute('data-density', String(value));
+    } else if (ctrl.id === 'cta-style') {
+      var btn = doc.querySelector('.cta');
+      if (btn) btn.classList.toggle('outline', value === 'outline');
+    }
+  }
+
+  function applyAll() {
+    CONTROLS.forEach(function (c) { applyOne(c, state[c.id]); });
+  }
+
+  function buildRow(ctrl) {
+    var row = document.createElement('div');
+    row.className = 'row';
+
+    if (ctrl.type === 'checkbox') {
+      var wrap = document.createElement('label');
+      wrap.className = 'checkbox-row';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = state[ctrl.id];
+      cb.addEventListener('change', function () {
+        state[ctrl.id] = cb.checked;
+        applyOne(ctrl, cb.checked);
+      });
+      wrap.appendChild(cb);
+      wrap.appendChild(document.createTextNode(ctrl.label));
+      row.appendChild(wrap);
+      return row;
+    }
+
+    var labelRow = document.createElement('div');
+    labelRow.className = 'row-label';
+    var labelText = document.createElement('span');
+    labelText.textContent = ctrl.label;
+    labelRow.appendChild(labelText);
+    var valEl;
+    if (ctrl.type === 'range') {
+      valEl = document.createElement('span');
+      valEl.className = 'val';
+      valEl.textContent = fmt(ctrl, state[ctrl.id]);
+      labelRow.appendChild(valEl);
+    }
+    row.appendChild(labelRow);
+
+    var input;
+    if (ctrl.type === 'range') {
+      input = document.createElement('input');
+      input.type = 'range';
+      input.min = ctrl.min; input.max = ctrl.max; input.step = ctrl.step;
+      input.value = state[ctrl.id];
+      input.addEventListener('input', function () {
+        var v = parseFloat(input.value);
+        state[ctrl.id] = v;
+        valEl.textContent = fmt(ctrl, v);
+        applyOne(ctrl, v);
+      });
+    } else if (ctrl.type === 'color') {
+      input = document.createElement('input');
+      input.type = 'color';
+      input.value = state[ctrl.id];
+      input.addEventListener('input', function () {
+        state[ctrl.id] = input.value;
+        applyOne(ctrl, input.value);
+      });
+    } else if (ctrl.type === 'select') {
+      input = document.createElement('select');
+      ctrl.options.forEach(function (o) {
+        var opt = document.createElement('option');
+        opt.value = o.value; opt.textContent = o.label;
+        if (o.value === state[ctrl.id]) opt.selected = true;
+        input.appendChild(opt);
+      });
+      input.addEventListener('change', function () {
+        state[ctrl.id] = input.value;
+        applyOne(ctrl, input.value);
+      });
+    }
+    row.appendChild(input);
+    return row;
+  }
+
+  function render() {
+    var groups = { typography: 'g-typography', color: 'g-color', spacing: 'g-spacing', motion: 'g-motion', viz: 'g-viz', chrome: 'g-chrome' };
+    Object.keys(groups).forEach(function (g) { document.getElementById(groups[g]).innerHTML = ''; });
+    CONTROLS.forEach(function (c) {
+      document.getElementById(groups[c.group]).appendChild(buildRow(c));
+    });
+  }
+
+  function tokensPayload() {
+    var tokens = {};
+    CONTROLS.forEach(function (c) {
+      if (c.varName) tokens[c.varName] = c.type === 'range' ? (state[c.id] + (c.unit || '')) : state[c.id];
+    });
+    return {
+      tokens: tokens,
+      motionEnabled: !!state['motion-enabled'],
+      density: state['density'],
+      ctaStyle: state['cta-style']
+    };
+  }
+
+  function setStatus(msg, cls) {
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    CONTROLS.forEach(function (c) { state[c.id] = c.def; });
+    render();
+    frame.src = frame.src; // hard reload so ambient SVG/animation state also resets cleanly
+    setStatus('Reset to defaults.');
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(tokensPayload(), null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'job-search-navigator-design-tokens.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    setStatus('Saving…');
+    fetch('/api/design/tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tokensPayload())
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      return res.json();
+    }).then(function () {
+      setStatus('Saved — the running app now uses these fonts/colors/radius. Open http://localhost:8000/ to see it.', 'ok');
+    }).catch(function (err) {
+      setStatus('Could not save: ' + err.message, 'err');
+    });
+  });
+
+  frame.addEventListener('load', applyAll);
+
+  // Restore a previously saved session, if any, so the tool doesn't forget your last pass.
+  fetch('/api/design/tokens').then(function (r) { return r.ok ? r.json() : null; }).then(function (saved) {
+    if (saved) {
+      CONTROLS.forEach(function (c) {
+        if (c.varName && saved.tokens && saved.tokens[c.varName] !== undefined) {
+          var raw = saved.tokens[c.varName];
+          state[c.id] = c.type === 'range' ? parseFloat(raw) : raw;
+        }
+      });
+      if (saved.motionEnabled !== undefined) state['motion-enabled'] = saved.motionEnabled;
+      if (saved.density !== undefined) state['density'] = saved.density;
+      if (saved.ctaStyle !== undefined) state['cta-style'] = saved.ctaStyle;
+    }
+    render();
+    applyAll();
+  }).catch(function () { render(); });
+})();
+</script>
+</body>
+</html>

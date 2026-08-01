@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Scan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Archivo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* ---- COLOR TOKENS ---- */
+    --c-bg-1: #f4f5f7;
+    --c-bg-2: #e8e9ec;
+    --c-ink: #1b1f24;      /* graphite -- primary ink, lines derive from this */
+    --c-slate: #2c3137;    /* secondary text */
+    --c-accent: #b3421f;   /* CTA / hub / highlight accent */
+    --c-accent-contrast: #ffffff;
+
+    /* ---- TYPOGRAPHY TOKENS ---- */
+    --font-display: "Space Grotesk", sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
+    --font-body: "IBM Plex Sans", sans-serif;
+    --h1-size-mult: 1;
+    --h1-weight: 400;
+    --h1-tracking: -0.01em;
+    --h1-max-width: 11.5ch;
+    --body-size-mult: 1;
+    --label-tracking: 0.18em;
+    --label-size-mult: 1;
+
+    /* ---- SPACING TOKENS ---- */
+    --content-pad-x: 5vw;
+    --content-width: 42vw;
+    --rhythm-mult: 1;
+    --bracket-size: 22px;
+    --bracket-inset-x: 2.5vw;
+    --bracket-inset-y: 3vh;
+
+    /* ---- MOTION TOKENS ---- */
+    --reveal-distance: 22px;
+    --reveal-duration: 700ms;
+    --reveal-stagger: 90ms;
+    --sweep-duration: 22s;
+    --ping-duration: 6s;
+    --blip-duration: 5s;
+    --ring-drift-duration: 100s;
+
+    /* ---- LINE / GRAPHIC STRENGTH TOKENS (color-mix percentages) ---- */
+    --line-strength: 14%;
+    --line-strong-strength: 32%;
+    --ring-strength: 12%;
+    --ring-strong-strength: 30%;
+    --dotted-strength: 20%;
+    --sweep-fill-strength: 6%;
+
+    /* ---- CHROME TOKENS ---- */
+    --radius: 0px;
+  }
+
+  @property --scan-active {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+
+  html.no-motion, html.no-motion * { animation: none !important; transition: none !important; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body { min-height: 100%; }
+  body {
+    background: linear-gradient(180deg, var(--c-bg-1) 0%, var(--c-bg-2) 100%);
+    color: var(--c-ink);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+  .hero { position: relative; min-height: 100vh; isolation: isolate; }
+
+  .bracket {
+    position: absolute;
+    width: var(--bracket-size); height: var(--bracket-size);
+    border-color: color-mix(in srgb, var(--c-ink) var(--line-strong-strength), transparent);
+    z-index: 5;
+  }
+  .bracket.tl { top: var(--bracket-inset-y); left: var(--bracket-inset-x); border-top: 1px solid; border-left: 1px solid; }
+  .bracket.tr { top: var(--bracket-inset-y); right: var(--bracket-inset-x); border-top: 1px solid; border-right: 1px solid; }
+  .bracket.bl { bottom: var(--bracket-inset-y); left: var(--bracket-inset-x); border-bottom: 1px solid; border-left: 1px solid; }
+  .bracket.br { bottom: var(--bracket-inset-y); right: var(--bracket-inset-x); border-bottom: 1px solid; border-right: 1px solid; }
+
+  .topbar, .bottombar {
+    position: absolute; left: 4vw; right: 4vw;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono);
+    font-size: calc(0.68rem * var(--label-size-mult));
+    letter-spacing: var(--label-tracking);
+    text-transform: uppercase; color: var(--c-slate); opacity: 0.55; z-index: 5;
+  }
+  .topbar { top: 3.4vh; }
+  .bottombar {
+    bottom: 3.4vh;
+    padding-top: calc(0.9rem * var(--rhythm-mult));
+    border-top: 1px solid color-mix(in srgb, var(--c-ink) var(--line-strength), transparent);
+  }
+  .bottombar span + span::before { content: "·"; margin: 0 0.6em; opacity: 0.6; }
+
+  .graph-wrap {
+    position: absolute; top: 0; right: 0; width: 62vw; height: 100vh; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #graph { width: 92%; height: 92%; }
+
+  .ring-static {
+    fill: none;
+    stroke: color-mix(in srgb, var(--c-ink) var(--ring-strength), transparent);
+    stroke-width: 1;
+  }
+  .ring-static.strong { stroke: color-mix(in srgb, var(--c-ink) var(--ring-strong-strength), transparent); }
+  .dotted {
+    stroke-dasharray: 1 7;
+    stroke: color-mix(in srgb, var(--c-ink) var(--dotted-strength), transparent) !important;
+    animation: dotted-spin var(--ring-drift-duration) linear infinite;
+    transform-origin: 450px 450px;
+  }
+  @keyframes dotted-spin { to { transform: rotate(360deg); } }
+
+  .ping { animation: ping var(--ping-duration) cubic-bezier(0.2,0.6,0.3,1) infinite;
+    stroke: color-mix(in srgb, var(--c-ink) 40%, transparent); fill: none; stroke-width: 1; }
+  @keyframes ping { 0% { r: 40; opacity: 0.55; } 100% { r: 330; opacity: 0; } }
+
+  .sweep-arc { transform-origin: 450px 450px; animation: sweep var(--sweep-duration) linear infinite; }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  .sweep-fill { fill: color-mix(in srgb, var(--c-ink) var(--sweep-fill-strength), transparent); }
+  .sweep-line { stroke: color-mix(in srgb, var(--c-ink) var(--line-strong-strength), transparent); stroke-width: 1; }
+
+  .hub { fill: var(--c-accent); }
+
+  /* ---- Blips-as-tabs: each blip is a tab of the real app. It flashes on
+     its own schedule so the highlight fires exactly as the rotating sweep
+     arc passes its angle (computed per-blip below), and it also lights up
+     fully on hover/focus regardless of where the sweep currently is. ---- */
+  .blip-link { cursor: pointer; }
+  .blip-group {
+    animation: blip-scan var(--sweep-duration) linear infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes blip-scan {
+    0% { --scan-active: 1; }
+    10% { --scan-active: 0; }
+    100% { --scan-active: 0; }
+  }
+  .blip-link:hover .blip-group, .blip-link:focus-visible .blip-group { --scan-active: 1 !important; }
+
+  .blip-hit { fill: transparent; }
+  .blip-dot { fill: color-mix(in srgb, var(--c-ink) 55%, transparent); }
+  .blip-highlight {
+    fill: var(--c-accent);
+    opacity: var(--scan-active, 0);
+    transform: scale(calc(1 + var(--scan-active, 0) * 1.1));
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .blip-ring {
+    fill: none;
+    stroke: var(--c-accent);
+    stroke-width: 1;
+    opacity: var(--scan-active, 0);
+    transform: scale(calc(1 + var(--scan-active, 0) * 2.2));
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .blip-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    fill: var(--c-ink);
+    opacity: var(--scan-active, 0);
+    pointer-events: none;
+  }
+  .blip-link:hover .blip-label, .blip-link:focus-visible .blip-label { opacity: 1 !important; }
+
+  html[data-density="1"] .tier-2, html[data-density="1"] .tier-3 { display: none; }
+  html[data-density="2"] .tier-3 { display: none; }
+
+  .content {
+    position: absolute; top: 0; left: 0; height: 100vh; width: var(--content-width);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 var(--content-pad-x); z-index: 3;
+  }
+
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: calc(0.72rem * var(--label-size-mult));
+    font-weight: 500; letter-spacing: var(--label-tracking);
+    text-transform: uppercase; color: var(--c-slate); opacity: 0.7;
+    margin-bottom: calc(1.6rem * var(--rhythm-mult));
+  }
+  .kicker::before { content: "// "; opacity: 0.5; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: var(--h1-weight);
+    font-size: calc(clamp(2.1rem, 3.6vw, 3.2rem) * var(--h1-size-mult));
+    line-height: 1.14;
+    letter-spacing: var(--h1-tracking);
+    color: var(--c-ink);
+    margin-bottom: calc(1.3rem * var(--rhythm-mult));
+    max-width: var(--h1-max-width);
+  }
+  .subhead {
+    font-family: var(--font-body);
+    font-size: calc(0.98rem * var(--body-size-mult));
+    line-height: 1.7; font-weight: 300;
+    color: var(--c-slate); opacity: 0.8; max-width: 40ch;
+    margin-bottom: calc(2.2rem * var(--rhythm-mult));
+  }
+  .cta-row { display: flex; align-items: center; gap: calc(1.4rem * var(--rhythm-mult)); }
+  .cta {
+    font-family: var(--font-mono);
+    font-size: calc(0.78rem * var(--label-size-mult));
+    font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--c-accent); color: var(--c-accent-contrast);
+    border: 1px solid var(--c-accent);
+    border-radius: var(--radius);
+    padding: 0.85rem 1.5rem; cursor: pointer;
+  }
+  .cta.outline { background: transparent; color: var(--c-accent); }
+  .rule { width: 50px; height: 1px; background: color-mix(in srgb, var(--c-ink) var(--line-strong-strength), transparent); }
+  .tag {
+    margin-top: calc(3rem * var(--rhythm-mult));
+    font-family: var(--font-mono);
+    font-size: calc(0.68rem * var(--label-size-mult));
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-slate); opacity: 0.5;
+  }
+  .tag b { color: var(--c-ink); opacity: 1; font-weight: 500; }
+
+  .coord {
+    position: absolute; font-family: var(--font-mono);
+    font-size: calc(0.62rem * var(--label-size-mult));
+    color: var(--c-slate); opacity: 0.4; letter-spacing: 0.06em; z-index: 4;
+  }
+  .coord.a { top: 10vh; right: 3vw; }
+  .coord.b { bottom: 14vh; right: 4vw; text-align: right; }
+
+  .reveal { opacity: 0; animation: reveal-in var(--reveal-duration) cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes reveal-in {
+    from { opacity: 0; transform: translateY(var(--reveal-distance)); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- How It Works ---- */
+  .how {
+    position: relative;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: calc(7rem * var(--rhythm-mult)) var(--content-pad-x) calc(9rem * var(--rhythm-mult));
+  }
+  .how-kicker {
+    font-family: var(--font-mono);
+    font-size: calc(0.72rem * var(--label-size-mult));
+    font-weight: 500; letter-spacing: var(--label-tracking);
+    text-transform: uppercase; color: var(--c-slate); opacity: 0.7;
+    margin-bottom: calc(1rem * var(--rhythm-mult));
+  }
+  .how-kicker::before { content: "// "; opacity: 0.5; }
+  .how h2 {
+    font-family: var(--font-display);
+    font-weight: var(--h1-weight);
+    font-size: calc(1.9rem * var(--h1-size-mult));
+    letter-spacing: var(--h1-tracking);
+    color: var(--c-ink);
+    margin-bottom: calc(1rem * var(--rhythm-mult));
+  }
+  .how-intro {
+    font-family: var(--font-body);
+    font-size: calc(1rem * var(--body-size-mult));
+    line-height: 1.7;
+    color: var(--c-slate);
+    max-width: 68ch;
+    margin-bottom: calc(3rem * var(--rhythm-mult));
+  }
+  .how-intro b { color: var(--c-ink); font-weight: 600; }
+
+  .how-list { list-style: none; }
+  .how-step {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1.2rem;
+    padding: calc(1.4rem * var(--rhythm-mult)) 0;
+    border-top: 1px solid color-mix(in srgb, var(--c-ink) var(--line-strength), transparent);
+  }
+  .how-step:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--c-ink) var(--line-strength), transparent);
+  }
+  .how-step-index {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--c-slate);
+    opacity: 0.55;
+    padding-top: 0.2rem;
+  }
+  .how-step-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--c-ink);
+    text-decoration: none;
+    margin-bottom: 0.4rem;
+  }
+  .how-step-title:hover { color: var(--c-accent); }
+  .how-step-title .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: var(--c-accent); flex-shrink: 0;
+  }
+  .how-step-body {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--c-slate);
+    max-width: 62ch;
+  }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="topbar">
+    <span>JOB-SEARCH-NAVIGATOR // INTELLIGENCE LAYER</span>
+    <span>OBJ.05 — MARKET.SCAN</span>
+  </div>
+
+  <div class="coord a">CYCLE: CONTINUOUS</div>
+  <div class="coord b">SOURCES: 3</div>
+
+  <div class="graph-wrap">
+    <svg id="graph" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet">
+      <circle class="ring-static strong" cx="450" cy="450" r="330"/>
+      <circle class="ring-static dotted tier-2" cx="450" cy="450" r="270"/>
+      <circle class="ring-static tier-2" cx="450" cy="450" r="200"/>
+      <circle class="ring-static tier-3" cx="450" cy="450" r="120"/>
+
+      <circle class="ping" cx="450" cy="450" r="40"/>
+      <circle class="ping" cx="450" cy="450" r="40" style="animation-delay: -2s"/>
+      <circle class="ping tier-2" cx="450" cy="450" r="40" style="animation-delay: -4s"/>
+
+      <g class="sweep-arc">
+        <path class="sweep-fill" d="M 450 450 L 450 120 A 330 330 0 0 1 622 202 Z"/>
+        <line class="sweep-line" x1="450" y1="450" x2="450" y2="120"/>
+      </g>
+
+      <circle class="hub" cx="450" cy="450" r="5"/>
+
+      <g id="blips"></g>
+
+      <text x="450" y="105" text-anchor="middle" fill="color-mix(in srgb, var(--c-ink) 40%, transparent)" font-family="var(--font-mono)" font-size="11">0°</text>
+      <text x="795" y="455" text-anchor="middle" fill="color-mix(in srgb, var(--c-ink) 40%, transparent)" font-family="var(--font-mono)" font-size="11">90°</text>
+    </svg>
+  </div>
+
+  <div class="content">
+    <div class="kicker reveal" style="animation-delay: calc(var(--reveal-stagger) * 0)">For job seekers in India</div>
+    <h1 class="reveal" style="animation-delay: calc(var(--reveal-stagger) * 1)">Your job search, modeled as a system.</h1>
+    <p class="subhead reveal" style="animation-delay: calc(var(--reveal-stagger) * 2)">Rank live listings against your LinkedIn profile, run a deterministic ATS check, and track every application — computed locally, nothing sent to the cloud.</p>
+    <div class="cta-row reveal" style="animation-delay: calc(var(--reveal-stagger) * 3)">
+      <a class="cta" href="#how-it-works">See how it works</a>
+      <div class="rule"></div>
+    </div>
+    <div class="tag reveal" style="animation-delay: calc(var(--reveal-stagger) * 4)">SYS.V5 — <b>SCAN</b> · CONTINUOUS MARKET SIGNAL</div>
+  </div>
+
+  <div class="bottombar">
+    <span>MARKET SCAN</span>
+    <span>SOURCES: ADZUNA / APOLLO / MANUAL</span>
+    <span>CYCLE: CONTINUOUS</span>
+  </div>
+</section>
+
+<section class="how" id="how-it-works">
+  <div class="how-kicker">How it works</div>
+  <h2>Nine tabs. One radar.</h2>
+  <p class="how-intro">
+    Every glowing point on the radar above is one part of the software — the sweep arc lights
+    each one up in turn as it rotates past, and hovering a point does the same on demand.
+    <b>Click any blip up there, or any step below, and it opens that exact tab in the app.</b>
+  </p>
+  <ol class="how-list" id="howList"></ol>
+</section>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var cx = 450, cy = 450;
+
+  // Each tab of the real app, placed around the radar. angle: 0=up, clockwise
+  // (matches the existing "0deg"/"90deg" reference labels already on the dial).
+  var TABS = [
+    { id: 'profile', label: 'Profile', angle: 15, radius: 120,
+      body: 'Upload the .zip from LinkedIn\'s "Download your data" export. It\'s parsed into your skills, experience, education, certifications, and projects -- this profile is what every other tab scores against.' },
+    { id: 'criteria', label: 'Search Criteria', angle: 55, radius: 200,
+      body: 'Describe the job(s) you want: keywords, target roles, industries, locations. Save as many criteria sets as you like -- Job Search runs against whichever one you pick.' },
+    { id: 'jobsearch', label: 'Job Search', angle: 95, radius: 330,
+      body: 'Live listings from Adzuna and Apollo, plus anything you\'ve added manually, merged and ranked against your profile. Each result shows an explainable match score, not a black-box one.' },
+    { id: 'manuallistings', label: 'Manual Listings', angle: 140, radius: 270,
+      body: 'Paste a job posting URL or its text directly. "Fetch & auto-fill" pulls the title/company/description for you from a URL you provide -- nothing is scraped automatically.' },
+    { id: 'contacts', label: 'Contacts & Leads', angle: 175, radius: 120,
+      body: 'A manual outreach tracker for recruiter/contact details and job leads -- status, notes, follow-ups. Entirely something you fill in yourself; nothing here is looked up automatically.' },
+    { id: 'cvats', label: 'CV & ATS', angle: 210, radius: 200,
+      body: 'Upload your CV (.pdf or .docx). A deterministic rule checklist -- layout, sections, contact info, length, fonts -- scores its ATS-compliance. No AI/LLM involved in the check itself.' },
+    { id: 'tailor', label: 'Tailor CV', angle: 250, radius: 330,
+      body: 'Pick a target job and your CV gets mechanically tailored to it: bullets reordered by relevance, a "Key Skills Match" line built only from words already in your CV. Never LLM-rewritten text.' },
+    { id: 'salary', label: 'Salary Insights', angle: 290, radius: 270,
+      body: 'A CTC / in-hand estimate from Adzuna\'s aggregate salary data, adjusted for your inferred experience level. The exact query used is always shown, so the adjustment is never silent.' },
+    { id: 'help', label: 'Help', angle: 330, radius: 120,
+      body: 'A walkthrough of every feature above, plus the reasoning behind what this software deliberately does NOT do (no LinkedIn scraping, no AI-written CV content, no hidden data collection).' }
+  ];
+
+  function pos(angle, radius) {
+    var rad = angle * Math.PI / 180;
+    return { x: cx + radius * Math.sin(rad), y: cy - radius * Math.cos(rad) };
+  }
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  var blipsGroup = document.getElementById('blips');
+  TABS.forEach(function (tab) {
+    var p = pos(tab.angle, tab.radius);
+    var fraction = tab.angle / 360;
+    var upperHalf = p.y < cy;
+
+    var link = el('a', { class: 'blip-link', href: '/?tab=' + tab.id, tabindex: '0' });
+    var titleEl = el('title', {});
+    titleEl.textContent = tab.label + ' -- open this tab';
+    link.appendChild(titleEl);
+
+    var group = el('g', {
+      class: 'blip-group',
+      style: 'animation-delay: calc(var(--sweep-duration) * ' + fraction.toFixed(4) + ')'
+    });
+    group.appendChild(el('circle', { class: 'blip-ring', cx: p.x, cy: p.y, r: 7 }));
+    group.appendChild(el('circle', { class: 'blip-highlight', cx: p.x, cy: p.y, r: 5 }));
+    group.appendChild(el('circle', { class: 'blip-dot', cx: p.x, cy: p.y, r: 3.5 }));
+
+    var label = el('text', {
+      class: 'blip-label', x: p.x, y: p.y + (upperHalf ? -14 : 22),
+      'text-anchor': 'middle'
+    });
+    label.textContent = tab.label;
+    group.appendChild(label);
+
+    var hit = el('circle', { class: 'blip-hit', cx: p.x, cy: p.y, r: 18 });
+    group.appendChild(hit);
+
+    link.appendChild(group);
+    blipsGroup.appendChild(link);
+
+    // Native SVG <a> click-to-navigate proved unreliable in testing
+    // (silently no-ops on some clicks). Drive navigation explicitly instead.
+    var dest = link.getAttribute('href');
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.location.href = dest;
+    });
+  });
+
+  var howList = document.getElementById('howList');
+  TABS.forEach(function (tab, i) {
+    var li = document.createElement('li');
+    li.className = 'how-step';
+    li.innerHTML =
+      '<div class="how-step-index">' + String(i + 1).padStart(2, '0') + '</div>' +
+      '<div>' +
+        '<a class="how-step-title" href="/?tab=' + tab.id + '"><span class="dot"></span>' + tab.label + '</a>' +
+        '<div class="how-step-body">' + tab.body + '</div>' +
+      '</div>';
+    howList.appendChild(li);
+  });
+})();
+</script>
+</body>
+</html>

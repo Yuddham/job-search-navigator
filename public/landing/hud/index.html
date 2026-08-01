@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Landing Page Directions — Analytical HUD — Job Search Navigator</title>
+<style>
+  :root {
+    --bg: #fafafa; --surface: #ffffff; --text: #1a1a1a; --text-muted: #6b6b6b;
+    --border: #e5e5e5; --accent: #1a1a1a; --accent-contrast: #ffffff; --chip-bg: #f0f0f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121212; --surface: #1a1a1a; --text: #ededed; --text-muted: #9a9a9a;
+      --border: #2a2a2a; --accent: #ededed; --accent-contrast: #121212; --chip-bg: #232323;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text);
+  }
+  header {
+    padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
+  }
+  header h1 { font-size: 1.05rem; margin: 0; font-weight: 600; }
+  header p { margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--text-muted); }
+  header a.back { font-size: 0.78rem; color: var(--text-muted); }
+
+  .mode-switch { display: flex; gap: 0.35rem; }
+  .mode-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 0.45rem 0.9rem; border-radius: 6px; font-size: 0.82rem; cursor: pointer;
+  }
+  .mode-btn.active { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); font-weight: 600; }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+
+  .variant-tabs { display: none; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .variant-tabs.visible { display: flex; }
+  .variant-tab-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+  }
+  .variant-tab-btn.active { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+  .grid.hidden { display: none; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .card-label {
+    padding: 0.7rem 1rem; font-size: 0.85rem; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
+  }
+  .card-label button {
+    font-size: 0.72rem; font-weight: 500; background: var(--chip-bg); border: none; color: var(--text);
+    padding: 0.25rem 0.6rem; border-radius: 999px; cursor: pointer;
+  }
+  .frame-wrap { width: 100%; aspect-ratio: 1200 / 675; overflow: hidden; position: relative; }
+  .frame-wrap iframe {
+    width: 1200px; height: 675px; border: 0; position: absolute; top: 0; left: 0; transform-origin: top left;
+  }
+
+  .full-view { display: none; }
+  .full-view.visible { display: block; }
+  .full-frame-wrap {
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden; aspect-ratio: 1200 / 675; max-height: 80vh;
+  }
+  .full-frame-wrap iframe { width: 100%; height: 100%; border: 0; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Job Search Navigator — Analytical HUD Directions</h1>
+    <p>5 hero variants, same copy/intent, each fully committing to one sub-aesthetic within the "computational research / intelligence workstation" family. Monochrome graphite/pearl palette, IBM Plex Mono + Space Grotesk, no purple gradients / 3D blobs / default sans.</p>
+    <a class="back" href="../index.html">&larr; back to the earlier round (Nightwatch / Ledger / Corridor / Signal / Aurora Line)</a>
+  </div>
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode="grid">Side by Side</button>
+    <button class="mode-btn" data-mode="full">Full Size</button>
+  </div>
+</header>
+
+<main>
+  <nav class="variant-tabs" id="variantTabs">
+    <button class="variant-tab-btn active" data-variant="v1-nexus">v1 · Nexus</button>
+    <button class="variant-tab-btn" data-variant="v2-radial">v2 · Radial</button>
+    <button class="variant-tab-btn" data-variant="v3-orbital">v3 · Orbital</button>
+    <button class="variant-tab-btn" data-variant="v4-cluster">v4 · Cluster</button>
+    <button class="variant-tab-btn" data-variant="v5-scan">v5 · Scan</button>
+  </nav>
+
+  <div class="grid" id="grid">
+    <div class="card">
+      <div class="card-label">v1 · Nexus <button data-open="v1-nexus">View full size</button></div>
+      <div class="frame-wrap"><iframe src="v1-nexus/hero.html" loading="lazy"></iframe></div>
+    </div>
+    <div class="card">
+      <div class="card-label">v2 · Radial <button data-open="v2-radial">View full size</button></div>
+      <div class="frame-wrap"><iframe src="v2-radial/hero.html" loading="lazy"></iframe></div>
+    </div>
+    <div class="card">
+      <div class="card-label">v3 · Orbital <button data-open="v3-orbital">View full size</button></div>
+      <div class="frame-wrap"><iframe src="v3-orbital/hero.html" loading="lazy"></iframe></div>
+    </div>
+    <div class="card">
+      <div class="card-label">v4 · Cluster <button data-open="v4-cluster">View full size</button></div>
+      <div class="frame-wrap"><iframe src="v4-cluster/hero.html" loading="lazy"></iframe></div>
+    </div>
+    <div class="card">
+      <div class="card-label">v5 · Scan — chosen direction
+      <span>
+        <button data-open="v5-scan">View full size</button>
+        <a href="v5-scan/tweak.html" style="margin-left:0.4rem;font-size:0.72rem;">Tune this design &rarr;</a>
+      </span>
+    </div>
+      <div class="frame-wrap"><iframe src="v5-scan/hero.html" loading="lazy"></iframe></div>
+    </div>
+  </div>
+
+  <div class="full-view" id="fullView">
+    <div class="full-frame-wrap">
+      <iframe id="fullFrame" src="v1-nexus/hero.html"></iframe>
+    </div>
+  </div>
+</main>
+
+<script src="landing.js"></script>
+</body>
+</html>

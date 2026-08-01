@@ -81,6 +81,26 @@
     if (tab === "help") loadHelp();
   }
 
+  // ---- Deep-link support: ?tab=<id> lets the landing page's radar blips
+  // (public/landing/hud/v5-scan/hero.html) open straight into a given tab.
+  // Arriving this way is a focused, single-tab view -- the other tabs are
+  // hidden and a back button (top-left) returns to the radar. Opening the
+  // app normally (no ?tab=) keeps the full nav, unchanged. ----
+  (() => {
+    const requestedTab = new URLSearchParams(location.search).get("tab");
+    const targetBtn = requestedTab && document.querySelector(`.tab-btn[data-tab="${requestedTab}"]`);
+    if (!targetBtn) return;
+
+    activateTab(requestedTab);
+    document.querySelector(".tabs").classList.add("focused-hidden");
+
+    const backBtn = document.getElementById("backToScan");
+    const label = document.getElementById("focusedTabLabel");
+    backBtn.hidden = false;
+    label.hidden = false;
+    label.textContent = targetBtn.textContent;
+  })();
+
   // ---- Profile ----
 
   document.getElementById("profileUploadForm").addEventListener("submit", async (e) => {
@@ -971,7 +991,12 @@
         `<td>${escapeHtml(e.role_query)}</td><td>${escapeHtml(e.location_query)}</td>` +
         `<td>${e.ctc_low !== null && e.ctc_low !== undefined ? formatINR(e.ctc_low) + " – " + formatINR(e.ctc_high) : "-"}</td>` +
         `<td>${e.inhand_low !== null && e.inhand_low !== undefined ? formatINR(e.inhand_low) + " – " + formatINR(e.inhand_high) : "-"}</td>` +
-        `<td>${new Date(e.created_at).toLocaleDateString()}</td>`;
+        `<td>${new Date(e.created_at).toLocaleDateString()}</td>` +
+        `<td><button class="delete-btn" title="Delete">&times;</button></td>`;
+      tr.querySelector(".delete-btn").addEventListener("click", async () => {
+        await api(`/api/salary/estimates/${e.id}`, { method: "DELETE" });
+        loadSalaryHistory();
+      });
       body.appendChild(tr);
     });
   }

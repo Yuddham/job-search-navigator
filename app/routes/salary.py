@@ -68,3 +68,10 @@ def list_estimates() -> list[SalaryEstimateOut]:
     with db.get_db() as conn:
         rows = conn.execute("SELECT * FROM salary_estimates ORDER BY created_at DESC").fetchall()
     return [_row_to_estimate(r) for r in rows]
+
+
+@router.delete("/estimates/{estimate_id}")
+def delete_estimate(estimate_id: int) -> dict:
+    with db.get_db() as conn:
+        conn.execute("DELETE FROM salary_estimates WHERE id = ?", (estimate_id,))
+    return {"status": "deleted"}

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Cluster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pearl: #f4f5f7; --grey-light: #e8e9ec; --grey-cool: #d9dce1;
+    --graphite: #1b1f24; --slate: #2c3137; --white: #ffffff; --silver: #c8cdd4;
+    --line: rgba(27, 31, 36, 0.14); --line-strong: rgba(27, 31, 36, 0.32);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(180deg, var(--pearl) 0%, var(--grey-cool) 100%);
+    color: var(--graphite); font-family: "IBM Plex Sans", system-ui, sans-serif; overflow: hidden;
+  }
+  .hero { position: relative; min-height: 100vh; isolation: isolate; }
+  .bracket { position: absolute; width: 22px; height: 22px; border-color: var(--line-strong); z-index: 5; }
+  .bracket.tl { top: 3vh; left: 2.5vw; border-top: 1px solid; border-left: 1px solid; }
+  .bracket.tr { top: 3vh; right: 2.5vw; border-top: 1px solid; border-right: 1px solid; }
+  .bracket.bl { bottom: 3vh; left: 2.5vw; border-bottom: 1px solid; border-left: 1px solid; }
+  .bracket.br { bottom: 3vh; right: 2.5vw; border-bottom: 1px solid; border-right: 1px solid; }
+
+  .topbar, .bottombar {
+    position: absolute; left: 4vw; right: 4vw;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.55; z-index: 5;
+  }
+  .topbar { top: 3.4vh; }
+  .bottombar { bottom: 3.4vh; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+  .bottombar span + span::before { content: "·"; margin: 0 0.6em; opacity: 0.6; }
+
+  .graph-wrap { position: absolute; top: 0; left: 0; width: 60vw; height: 100vh; z-index: 1; }
+  #graph { width: 100%; height: 100%; }
+  .blur-disc { filter: blur(22px); animation: breathe 12s ease-in-out infinite; }
+  .blur-disc:nth-child(2n) { animation-duration: 15s; animation-delay: -4s; }
+  .blur-disc:nth-child(3n) { animation-duration: 18s; animation-delay: -8s; }
+  @keyframes breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.9; } }
+  .particle { animation: drift 14s ease-in-out infinite; }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(var(--dx, 4px), var(--dy, -4px)); }
+  }
+
+  .content { position: absolute; top: 0; right: 0; height: 100vh; width: 44vw;
+    display: flex; flex-direction: column; justify-content: center; padding: 0 5vw; z-index: 3; }
+
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate); opacity: 0.7; margin-bottom: 1.6rem; }
+  .kicker::before { content: "// "; opacity: 0.5; }
+  h1 { font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+    line-height: 1.14; letter-spacing: -0.01em; color: var(--graphite); margin-bottom: 1.3rem; max-width: 11.5ch; }
+  .subhead { font-size: 0.98rem; line-height: 1.7; font-weight: 300; color: var(--slate); opacity: 0.8;
+    max-width: 40ch; margin-bottom: 2.2rem; }
+  .cta-row { display: flex; align-items: center; gap: 1.4rem; }
+  .cta { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; background: var(--graphite); color: var(--white); border: none; padding: 0.85rem 1.5rem; cursor: pointer; }
+  .rule { width: 50px; height: 1px; background: var(--line-strong); }
+  .tag { margin-top: 3rem; font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.5; }
+  .tag b { color: var(--graphite); opacity: 1; font-weight: 500; }
+
+  .coord { position: absolute; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem;
+    color: var(--slate); opacity: 0.4; letter-spacing: 0.06em; z-index: 4; }
+  .coord.a { top: 10vh; left: 3vw; }
+  .coord.b { bottom: 14vh; left: 4vw; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="topbar">
+    <span>OBJ.04 — KEYWORD.FIELD</span>
+    <span>JOB-SEARCH-NAVIGATOR // INTELLIGENCE LAYER</span>
+  </div>
+
+  <div class="coord a">DENSITY MAP</div>
+  <div class="coord b">Δ SKILL OVERLAP</div>
+
+  <div class="graph-wrap">
+    <svg id="graph" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="content">
+    <div class="kicker">For job seekers in India</div>
+    <h1>Your job search, modeled as a system.</h1>
+    <p class="subhead">Rank live listings against your LinkedIn profile, run a deterministic ATS check, and track every application — computed locally, nothing sent to the cloud.</p>
+    <div class="cta-row">
+      <button class="cta">See how it works</button>
+      <div class="rule"></div>
+    </div>
+    <div class="tag">SYS.V4 — <b>CLUSTER</b> · KEYWORD DENSITY FIELD</div>
+  </div>
+
+  <div class="bottombar">
+    <span>KEYWORD DENSITY FIELD</span>
+    <span>CLUSTERS 9</span>
+    <span>WEIGHT: SKILL OVERLAP</span>
+  </div>
+</section>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('graph');
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var rand = mulberry32(777);
+
+  var clusters = [
+    { x: 300, y: 260, r: 100 }, { x: 520, y: 220, r: 70 },
+    { x: 470, y: 470, r: 130 }, { x: 230, y: 520, r: 80 },
+    { x: 620, y: 560, r: 60 }, { x: 390, y: 650, r: 90 },
+    { x: 150, y: 320, r: 50 }, { x: 660, y: 350, r: 55 },
+    { x: 340, y: 420, r: 40 }
+  ];
+
+  // blurred discs first (background density)
+  clusters.forEach(function (c) {
+    svg.appendChild(el('circle', {
+      class: 'blur-disc', cx: c.x, cy: c.y, r: c.r,
+      fill: 'rgba(27,31,36,0.07)'
+    }));
+  });
+  clusters.forEach(function (c) {
+    svg.appendChild(el('circle', {
+      cx: c.x, cy: c.y, r: c.r * 0.6, fill: 'none',
+      stroke: 'rgba(27,31,36,0.14)', 'stroke-width': 1
+    }));
+  });
+
+  // scattered particles within/around clusters, some connecting lines
+  var particles = [];
+  clusters.forEach(function (c) {
+    var n = Math.round(10 + rand() * 14);
+    for (var i = 0; i < n; i++) {
+      var ang = rand() * Math.PI * 2;
+      var rad = Math.pow(rand(), 0.7) * c.r * 1.1;
+      particles.push({ x: c.x + Math.cos(ang) * rad, y: c.y + Math.sin(ang) * rad });
+    }
+  });
+
+  var edges = el('g', {});
+  svg.appendChild(edges);
+  for (var i = 0; i < particles.length; i++) {
+    for (var j = i + 1; j < particles.length; j++) {
+      var dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 34) {
+        var op = (1 - d / 34) * 0.3;
+        edges.appendChild(el('line', {
+          x1: particles[i].x, y1: particles[i].y, x2: particles[j].x, y2: particles[j].y,
+          stroke: 'rgba(27,31,36,' + op.toFixed(2) + ')', 'stroke-width': 0.5
+        }));
+      }
+    }
+  }
+
+  particles.forEach(function (p, idx) {
+    var dx = (rand() * 8 - 4).toFixed(1);
+    var dy = (rand() * 8 - 4).toFixed(1);
+    var dur = (9 + rand() * 10).toFixed(1);
+    var c = el('circle', {
+      class: 'particle', cx: p.x, cy: p.y, r: 1.3 + rand() * 1.6,
+      fill: 'rgba(27,31,36,' + (0.4 + rand() * 0.35).toFixed(2) + ')'
+    });
+    c.style.setProperty('--dx', dx + 'px');
+    c.style.setProperty('--dy', dy + 'px');
+    c.style.animationDuration = dur + 's';
+    c.style.animationDelay = (-rand() * 10).toFixed(1) + 's';
+    svg.appendChild(c);
+  });
+})();
+</script>
+</body>
+</html>

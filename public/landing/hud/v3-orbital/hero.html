@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Orbital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pearl: #f4f5f7; --grey-light: #e8e9ec; --grey-cool: #d9dce1;
+    --graphite: #1b1f24; --slate: #2c3137; --white: #ffffff; --silver: #c8cdd4;
+    --line: rgba(27, 31, 36, 0.14); --line-strong: rgba(27, 31, 36, 0.32);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(160deg, var(--pearl) 0%, var(--grey-light) 60%, var(--grey-cool) 100%);
+    color: var(--graphite); font-family: "IBM Plex Sans", system-ui, sans-serif; overflow: hidden;
+  }
+  .hero { position: relative; min-height: 100vh; isolation: isolate; }
+  .bracket { position: absolute; width: 22px; height: 22px; border-color: var(--line-strong); z-index: 5; }
+  .bracket.tl { top: 3vh; left: 2.5vw; border-top: 1px solid; border-left: 1px solid; }
+  .bracket.tr { top: 3vh; right: 2.5vw; border-top: 1px solid; border-right: 1px solid; }
+  .bracket.bl { bottom: 3vh; left: 2.5vw; border-bottom: 1px solid; border-left: 1px solid; }
+  .bracket.br { bottom: 3vh; right: 2.5vw; border-bottom: 1px solid; border-right: 1px solid; }
+
+  .topbar, .bottombar {
+    position: absolute; left: 4vw; right: 4vw;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.55; z-index: 5;
+  }
+  .topbar { top: 3.4vh; }
+  .bottombar { bottom: 3.4vh; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+  .bottombar span + span::before { content: "·"; margin: 0 0.6em; opacity: 0.6; }
+
+  .graph-wrap { position: absolute; top: 0; right: 0; width: 60vw; height: 100vh; z-index: 1; }
+  #graph { width: 100%; height: 100%; }
+
+  .content { position: absolute; top: 0; left: 0; height: 100vh; width: 44vw;
+    display: flex; flex-direction: column; justify-content: center; padding: 0 5vw; z-index: 3; }
+
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate); opacity: 0.7; margin-bottom: 1.6rem; }
+  .kicker::before { content: "// "; opacity: 0.5; }
+  h1 { font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+    line-height: 1.14; letter-spacing: -0.01em; color: var(--graphite); margin-bottom: 1.3rem; max-width: 11.5ch; }
+  .subhead { font-size: 0.98rem; line-height: 1.7; font-weight: 300; color: var(--slate); opacity: 0.8;
+    max-width: 40ch; margin-bottom: 2.2rem; }
+  .cta-row { display: flex; align-items: center; gap: 1.4rem; }
+  .cta { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; background: var(--graphite); color: var(--white); border: none; padding: 0.85rem 1.5rem; cursor: pointer; }
+  .rule { width: 50px; height: 1px; background: var(--line-strong); }
+  .tag { margin-top: 3rem; font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.5; }
+  .tag b { color: var(--graphite); opacity: 1; font-weight: 500; }
+
+  .coord { position: absolute; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem;
+    color: var(--slate); opacity: 0.4; letter-spacing: 0.06em; z-index: 4; }
+  .coord.a { top: 10vh; right: 3vw; }
+  .coord.b { bottom: 14vh; right: 4vw; text-align: right; }
+
+  .orbit-path { stroke-dasharray: 1 6; }
+  .orbit1 { animation: spin1 34s linear infinite; transform-origin: 450px 450px; }
+  .orbit2 { animation: spin2 54s linear infinite reverse; transform-origin: 450px 450px; }
+  .orbit3 { animation: spin3 78s linear infinite; transform-origin: 450px 450px; }
+  @keyframes spin1 { to { transform: rotate(360deg); } }
+  @keyframes spin2 { to { transform: rotate(360deg); } }
+  @keyframes spin3 { to { transform: rotate(360deg); } }
+  .core { animation: core-breathe 8s ease-in-out infinite; }
+  @keyframes core-breathe { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="topbar">
+    <span>JOB-SEARCH-NAVIGATOR // INTELLIGENCE LAYER</span>
+    <span>OBJ.03 — PIPELINE.ORBIT</span>
+  </div>
+
+  <div class="coord a">EPOCH 2026.08</div>
+  <div class="coord b">4 STAGES TRACKED</div>
+
+  <div class="graph-wrap">
+    <svg id="graph" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet">
+      <ellipse class="orbit-path" cx="450" cy="450" rx="130" ry="80" fill="none" stroke="rgba(27,31,36,0.20)" stroke-width="1"/>
+      <ellipse class="orbit-path" cx="450" cy="450" rx="220" ry="140" fill="none" stroke="rgba(27,31,36,0.16)" stroke-width="1"/>
+      <ellipse class="orbit-path" cx="450" cy="450" rx="310" ry="205" fill="none" stroke="rgba(27,31,36,0.12)" stroke-width="1"/>
+
+      <circle class="core" cx="450" cy="450" r="34" fill="rgba(27,31,36,0.06)" stroke="rgba(27,31,36,0.30)" stroke-width="1"/>
+      <circle cx="450" cy="450" r="5" fill="rgba(27,31,36,0.85)"/>
+
+      <g class="orbit1">
+        <circle cx="580" cy="450" r="6" fill="rgba(27,31,36,0.8)"/>
+        <circle cx="320" cy="450" r="4" fill="rgba(27,31,36,0.55)"/>
+      </g>
+      <g class="orbit2">
+        <circle cx="670" cy="450" r="7" fill="rgba(27,31,36,0.75)"/>
+        <circle cx="230" cy="450" r="4.5" fill="rgba(27,31,36,0.5)"/>
+        <circle cx="450" cy="310" r="4" fill="rgba(27,31,36,0.45)"/>
+      </g>
+      <g class="orbit3">
+        <circle cx="760" cy="450" r="5.5" fill="rgba(27,31,36,0.6)"/>
+        <circle cx="140" cy="450" r="5" fill="rgba(27,31,36,0.55)"/>
+        <circle cx="600" cy="250" r="4" fill="rgba(27,31,36,0.4)"/>
+      </g>
+
+      <text x="450" y="410" text-anchor="middle" fill="rgba(27,31,36,0.5)" font-family="IBM Plex Mono, monospace" font-size="11">PROFILE</text>
+      <text x="580" y="430" text-anchor="middle" fill="rgba(27,31,36,0.4)" font-family="IBM Plex Mono, monospace" font-size="10">MATCHED</text>
+      <text x="670" y="430" text-anchor="middle" fill="rgba(27,31,36,0.4)" font-family="IBM Plex Mono, monospace" font-size="10">APPLIED</text>
+      <text x="760" y="430" text-anchor="middle" fill="rgba(27,31,36,0.4)" font-family="IBM Plex Mono, monospace" font-size="10">INTERVIEW</text>
+    </svg>
+  </div>
+
+  <div class="content">
+    <div class="kicker">For job seekers in India</div>
+    <h1>Your job search, modeled as a system.</h1>
+    <p class="subhead">Rank live listings against your LinkedIn profile, run a deterministic ATS check, and track every application — computed locally, nothing sent to the cloud.</p>
+    <div class="cta-row">
+      <button class="cta">See how it works</button>
+      <div class="rule"></div>
+    </div>
+    <div class="tag">SYS.V3 — <b>ORBITAL</b> · APPLICATION PIPELINE SYSTEM</div>
+  </div>
+
+  <div class="bottombar">
+    <span>PIPELINE</span>
+    <span>STAGES 4</span>
+    <span>ACTIVE 12</span>
+    <span>ORBIT: REAL-TIME</span>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Job Search Navigator — Radial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pearl: #f4f5f7; --grey-light: #e8e9ec; --grey-cool: #d9dce1;
+    --graphite: #1b1f24; --slate: #2c3137; --white: #ffffff; --silver: #c8cdd4;
+    --line: rgba(27, 31, 36, 0.14); --line-strong: rgba(27, 31, 36, 0.32);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(180deg, var(--pearl) 0%, var(--grey-cool) 100%);
+    color: var(--graphite); font-family: "IBM Plex Sans", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  .hero { position: relative; min-height: 100vh; isolation: isolate; }
+  .bracket { position: absolute; width: 22px; height: 22px; border-color: var(--line-strong); z-index: 5; }
+  .bracket.tl { top: 3vh; left: 2.5vw; border-top: 1px solid; border-left: 1px solid; }
+  .bracket.tr { top: 3vh; right: 2.5vw; border-top: 1px solid; border-right: 1px solid; }
+  .bracket.bl { bottom: 3vh; left: 2.5vw; border-bottom: 1px solid; border-left: 1px solid; }
+  .bracket.br { bottom: 3vh; right: 2.5vw; border-bottom: 1px solid; border-right: 1px solid; }
+
+  .topbar, .bottombar {
+    position: absolute; left: 4vw; right: 4vw;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.55; z-index: 5;
+  }
+  .topbar { top: 3.4vh; }
+  .bottombar { bottom: 3.4vh; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+  .bottombar span + span::before { content: "·"; margin: 0 0.6em; opacity: 0.6; }
+
+  .graph-wrap { position: absolute; top: 0; left: 0; width: 58vw; height: 100vh; z-index: 1; }
+  #graph { width: 100%; height: 100%; }
+  .sweep { transform-origin: 450px 450px; animation: sweep-spin 42s linear infinite; }
+  @keyframes sweep-spin { to { transform: rotate(360deg); } }
+  .ring-outer { animation: ring-drift 140s linear infinite; transform-origin: 450px 450px; }
+  @keyframes ring-drift { to { transform: rotate(-360deg); } }
+  .marker { animation: pulse 6s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.95; } }
+
+  .content { position: absolute; top: 0; right: 0; height: 100vh; width: 44vw;
+    display: flex; flex-direction: column; justify-content: center; padding: 0 5vw; z-index: 3; }
+
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--slate); opacity: 0.7; margin-bottom: 1.6rem; }
+  .kicker::before { content: "// "; opacity: 0.5; }
+  h1 { font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+    line-height: 1.14; letter-spacing: -0.01em; color: var(--graphite); margin-bottom: 1.3rem; max-width: 11.5ch; }
+  .subhead { font-size: 0.98rem; line-height: 1.7; font-weight: 300; color: var(--slate); opacity: 0.8;
+    max-width: 40ch; margin-bottom: 2.2rem; }
+  .cta-row { display: flex; align-items: center; gap: 1.4rem; }
+  .cta { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; background: var(--graphite); color: var(--white); border: none; padding: 0.85rem 1.5rem; cursor: pointer; }
+  .rule { width: 50px; height: 1px; background: var(--line-strong); }
+  .tag { margin-top: 3rem; font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--slate); opacity: 0.5; }
+  .tag b { color: var(--graphite); opacity: 1; font-weight: 500; }
+
+  .coord { position: absolute; font-family: "IBM Plex Mono", monospace; font-size: 0.62rem;
+    color: var(--slate); opacity: 0.4; letter-spacing: 0.06em; z-index: 4; }
+  .coord.a { top: 10vh; left: 3vw; }
+  .coord.b { bottom: 14vh; left: 4vw; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="topbar">
+    <span>OBJ.02 — MATCH.INDEX</span>
+    <span>JOB-SEARCH-NAVIGATOR // INTELLIGENCE LAYER</span>
+  </div>
+
+  <div class="coord a">DIAL 04 · REV C</div>
+  <div class="coord b">SCALE 1:1</div>
+
+  <div class="graph-wrap">
+    <svg id="graph" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="content">
+    <div class="kicker">For job seekers in India</div>
+    <h1>Your job search, modeled as a system.</h1>
+    <p class="subhead">Rank live listings against your LinkedIn profile, run a deterministic ATS check, and track every application — computed locally, nothing sent to the cloud.</p>
+    <div class="cta-row">
+      <button class="cta">See how it works</button>
+      <div class="rule"></div>
+    </div>
+    <div class="tag">SYS.V2 — <b>RADIAL</b> · CIRCULAR MATCH ANALYTICS</div>
+  </div>
+
+  <div class="bottombar">
+    <span>MATCH INDEX</span>
+    <span>RANGE 0–100</span>
+    <span>MEDIAN 74</span>
+    <span>SAMPLE 212 LISTINGS</span>
+  </div>
+</section>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('graph');
+  var cx = 450, cy = 450;
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var rand = mulberry32(4242);
+
+  var outer = el('g', { class: 'ring-outer' });
+  svg.appendChild(outer);
+
+  var radii = [120, 190, 260, 330];
+  radii.forEach(function (r, i) {
+    outer.appendChild(el('circle', {
+      cx: cx, cy: cy, r: r, fill: 'none',
+      stroke: i === radii.length - 1 ? 'rgba(27,31,36,0.30)' : 'rgba(27,31,36,0.14)',
+      'stroke-width': 1,
+      'stroke-dasharray': i === radii.length - 1 ? '1 7' : 'none'
+    }));
+  });
+
+  // radial spokes with tick marks every 15deg, labels every 45deg
+  for (var deg = 0; deg < 360; deg += 15) {
+    var rad = deg * Math.PI / 180;
+    var inner = 330, outerR = deg % 45 === 0 ? 345 : 338;
+    var x1 = cx + Math.cos(rad) * inner, y1 = cy + Math.sin(rad) * inner;
+    var x2 = cx + Math.cos(rad) * outerR, y2 = cy + Math.sin(rad) * outerR;
+    outer.appendChild(el('line', {
+      x1: x1, y1: y1, x2: x2, y2: y2,
+      stroke: 'rgba(27,31,36,0.35)', 'stroke-width': deg % 45 === 0 ? 1.2 : 0.6
+    }));
+  }
+
+  // faint spoke lines from center to outer ring, every 45deg
+  for (var d2 = 0; d2 < 360; d2 += 45) {
+    var r2 = d2 * Math.PI / 180;
+    outer.appendChild(el('line', {
+      x1: cx, y1: cy, x2: cx + Math.cos(r2) * 330, y2: cy + Math.sin(r2) * 330,
+      stroke: 'rgba(27,31,36,0.06)', 'stroke-width': 1
+    }));
+  }
+
+  // scattered match-score points: distance from center encodes score
+  for (var i = 0; i < 46; i++) {
+    var a = rand() * Math.PI * 2;
+    var score = rand();
+    var rr = 40 + score * 300;
+    var x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+    var big = i % 9 === 0;
+    var node = el('circle', {
+      cx: x, cy: y, r: big ? 4.5 : 1.8 + rand(),
+      fill: big ? 'rgba(27,31,36,0.85)' : 'rgba(27,31,36,0.5)'
+    });
+    if (i % 5 === 0) node.setAttribute('class', 'marker');
+    outer.appendChild(node);
+  }
+
+  // center hub
+  outer.appendChild(el('circle', { cx: cx, cy: cy, r: 46, fill: 'rgba(27,31,36,0.05)', stroke: 'rgba(27,31,36,0.22)', 'stroke-width': 1 }));
+  outer.appendChild(el('circle', { cx: cx, cy: cy, r: 6, fill: 'rgba(27,31,36,0.85)' }));
+
+  // rotating sweep needle
+  var sweep = el('g', { class: 'sweep' });
+  sweep.appendChild(el('line', { x1: cx, y1: cy, x2: cx, y2: cy - 330, stroke: 'rgba(27,31,36,0.28)', 'stroke-width': 1 }));
+  sweep.appendChild(el('line', { x1: cx, y1: cy, x2: cx, y2: cy - 330,
+    stroke: 'rgba(27,31,36,0.10)', 'stroke-width': 26 }));
+  svg.appendChild(sweep);
+
+  // annotation labels at a few spoke ends
+  [{ deg: 0, v: '82' }, { deg: 90, v: '61' }, { deg: 225, v: '74' }].forEach(function (m) {
+    var r3 = m.deg * Math.PI / 180;
+    var lx = cx + Math.cos(r3) * 365, ly = cy + Math.sin(r3) * 365;
+    var t = el('text', {
+      x: lx, y: ly, fill: 'rgba(27,31,36,0.45)', 'font-family': 'IBM Plex Mono, monospace',
+      'font-size': '13', 'text-anchor': 'middle'
+    });
+    t.textContent = m.v;
+    outer.appendChild(t);
+  });
+})();
+</script>
+</body>
+</html>

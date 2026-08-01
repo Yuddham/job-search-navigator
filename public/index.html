@@ -5,10 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Job Search Navigator</title>
 <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="design-tokens.css" />
 </head>
 <body>
 <header class="topbar">
-  <h1>Job Search Navigator</h1>
+  <div class="topbar-left">
+    <a id="backToScan" class="back-btn" href="/landing/hud/v5-scan/hero.html" title="Back to the radar" hidden>&larr;</a>
+    <h1>Job Search Navigator</h1>
+    <span id="focusedTabLabel" class="focused-tab-label" hidden></span>
+  </div>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="profile">Profile</button>
     <button class="tab-btn" data-tab="criteria">Search Criteria</button>
@@ -20,7 +25,6 @@
     <button class="tab-btn" data-tab="salary">Salary Insights</button>
     <button class="tab-btn" data-tab="help">Help</button>
   </nav>
-  <a class="landing-link" href="landing/index.html" target="_blank" rel="noopener">Landing Page Directions ↗</a>
 </header>
 
 <main>
@@ -264,7 +268,7 @@
     <div class="panel">
       <h3>Past estimates</h3>
       <table class="checklist-table">
-        <thead><tr><th>Role</th><th>Location</th><th>CTC range</th><th>In-hand range</th><th>Date</th></tr></thead>
+        <thead><tr><th>Role</th><th>Location</th><th>CTC range</th><th>In-hand range</th><th>Date</th><th></th></tr></thead>
         <tbody id="salaryHistoryBody"></tbody>
       </table>
     </div>
