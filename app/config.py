@@ -1,10 +1,22 @@
 import os
 import secrets
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+if getattr(sys, "frozen", False):
+    # Packaged desktop app: BASE_DIR (source tree root in dev mode) doesn't
+    # exist, and even if it did, an installed exe's own directory (e.g.
+    # under Program Files) usually isn't writable by a non-admin user. All
+    # writable state -- DB, uploads, .env/APP_KEY -- lives per-user instead.
+    # This must NOT be confused with app/main.py's own BASE_DIR, which
+    # points at PyInstaller's bundled (read-only) assets instead.
+    BASE_DIR = Path(os.environ["APPDATA"]) / "Navigrad"
+    BASE_DIR.mkdir(parents=True, exist_ok=True)
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
 ENV_PATH = BASE_DIR / ".env"
 load_dotenv(ENV_PATH)
 

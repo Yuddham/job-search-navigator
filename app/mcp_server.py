@@ -16,7 +16,7 @@ from mcp.server.mcpserver import MCPServer
 from app import db, linkedin_export
 
 mcp_server = MCPServer(
-    name="job-search-navigator",
+    name="navigrad",
     instructions=(
         "Local job-search assistant for the Indian market. Ranks live job listings "
         "(Adzuna/Apollo/Apify, plus manually-added listings) against the user's "

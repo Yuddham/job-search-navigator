@@ -1,3 +1,4 @@
+import sys
 from contextlib import AsyncExitStack
 from pathlib import Path
 
@@ -9,10 +10,19 @@ from starlette.responses import JSONResponse
 from app import config, db
 from app.mcp_server import mcp_server
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+if getattr(sys, "frozen", False):
+    # Packaged desktop app: public/ was bundled by PyInstaller as read-only
+    # "datas" next to the exe (onedir build), not next to this source file
+    # (which inside a frozen build doesn't hold the bundled assets at all).
+    # This is deliberately separate from config.BASE_DIR, which points at
+    # writable per-user data instead -- these solve different problems.
+    BASE_DIR = Path(sys._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
 LANDING_PAGE_PATH = BASE_DIR / "public" / "landing" / "hud" / "v5-scan" / "hero.html"
 
-app = FastAPI(title="Job Search Navigator")
+app = FastAPI(title="Navigrad")
 _mcp_exit_stack: AsyncExitStack | None = None
 
 

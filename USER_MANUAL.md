@@ -1,4 +1,4 @@
-# Job Search Navigator — User Manual
+# Navigrad — User Manual
 
 This is a local, single-user tool for a job search in India. Everything runs on your own
 machine; nothing about your profile, CV, or contacts is sent anywhere except the specific
@@ -229,14 +229,14 @@ for anywhere.
    in a trailing slash, e.g. `http://127.0.0.1:8000/mcp/` — that trailing slash matters).
 3. In Claude Code, register it as an HTTP MCP server with the App Key as a bearer token:
    ```
-   claude mcp add --transport http job-search-navigator http://127.0.0.1:8000/mcp/ --header "Authorization: Bearer <your App Key>"
+   claude mcp add --transport http navigrad http://127.0.0.1:8000/mcp/ --header "Authorization: Bearer <your App Key>"
    ```
    (Run `claude mcp add --help` if your Claude Code version's flags differ — the important
    part is: transport = HTTP, URL = the MCP server URL from Settings, and an `Authorization:
    Bearer <App Key>` header.) For any other MCP-compatible client, the equivalent is usually a
    config entry like:
    ```json
-   { "mcpServers": { "job-search-navigator": {
+   { "mcpServers": { "navigrad": {
        "type": "http", "url": "http://127.0.0.1:8000/mcp/",
        "headers": { "Authorization": "Bearer <your App Key>" }
    } } }

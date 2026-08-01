@@ -97,7 +97,7 @@
   }
 
   function exportHeader(title) {
-    return `${title}\nExported from Job Search Navigator on ${new Date().toLocaleString()}\n${"=".repeat(60)}\n\n`;
+    return `${title}\nExported from Navigrad on ${new Date().toLocaleString()}\n${"=".repeat(60)}\n\n`;
   }
 
   function populateStatusSelect(select, current) {

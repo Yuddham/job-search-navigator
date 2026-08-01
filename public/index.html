@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Job Search Navigator</title>
+<title>Navigrad</title>
+<link rel="icon" href="/favicon.ico" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet" />
@@ -15,7 +16,7 @@
 <header class="topbar">
   <div class="topbar-left">
     <a id="backToScan" class="back-btn" href="/" title="Back to the radar" hidden>&larr;</a>
-    <h1>Job Search Navigator</h1>
+    <h1>Navigrad</h1>
     <span id="focusedTabLabel" class="focused-tab-label" hidden></span>
   </div>
   <nav class="tabs">
@@ -431,7 +432,7 @@
         <ol>
           <li>Make sure this app is running (locally, or as the installed tray app) -- the MCP server only answers while it's running.</li>
           <li>Copy the <strong>App Key</strong> and <strong>MCP server URL</strong> above.</li>
-          <li>In Claude Code: <code>claude mcp add --transport http job-search-navigator &lt;MCP server URL&gt; --header "Authorization: Bearer &lt;App Key&gt;"</code></li>
+          <li>In Claude Code: <code>claude mcp add --transport http navigrad &lt;MCP server URL&gt; --header "Authorization: Bearer &lt;App Key&gt;"</code></li>
           <li>See the Help tab for the full walkthrough, including the equivalent for other MCP-compatible LLM tools.</li>
         </ol>
       </details>
