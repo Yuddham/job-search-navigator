@@ -1,13 +1,22 @@
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app import config, db
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+LANDING_PAGE_PATH = BASE_DIR / "public" / "landing" / "hud" / "v5-scan" / "hero.html"
 
 app = FastAPI(title="Job Search Navigator")
+
+
+@app.get("/", include_in_schema=False)
+def home() -> FileResponse:
+    # The v5-scan radar landing page is the app's default home page; the
+    # actual app (formerly served at "/") is still reachable at /index.html.
+    return FileResponse(LANDING_PAGE_PATH)
 
 
 @app.on_event("startup")

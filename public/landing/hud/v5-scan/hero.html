@@ -441,7 +441,7 @@
     var fraction = tab.angle / 360;
     var upperHalf = p.y < cy;
 
-    var link = el('a', { class: 'blip-link', href: '/?tab=' + tab.id, tabindex: '0' });
+    var link = el('a', { class: 'blip-link', href: '/index.html?tab=' + tab.id, tabindex: '0' });
     var titleEl = el('title', {});
     titleEl.textContent = tab.label + ' -- open this tab';
     link.appendChild(titleEl);
@@ -483,7 +483,7 @@
     li.innerHTML =
       '<div class="how-step-index">' + String(i + 1).padStart(2, '0') + '</div>' +
       '<div>' +
-        '<a class="how-step-title" href="/?tab=' + tab.id + '"><span class="dot"></span>' + tab.label + '</a>' +
+        '<a class="how-step-title" href="/index.html?tab=' + tab.id + '"><span class="dot"></span>' + tab.label + '</a>' +
         '<div class="how-step-body">' + tab.body + '</div>' +
       '</div>';
     howList.appendChild(li);
