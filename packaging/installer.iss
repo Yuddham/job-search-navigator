@@ -4,7 +4,7 @@
 ; (run packaging\navigrad.spec first).
 
 #define MyAppName "Navigrad"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppExeName "Navigrad.exe"
 
 [Setup]

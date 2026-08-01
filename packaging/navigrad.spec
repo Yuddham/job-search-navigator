@@ -19,7 +19,10 @@ a = Analysis(
     [os.path.join(REPO_ROOT, "app", "desktop.py")],
     pathex=[REPO_ROOT],
     binaries=[],
-    datas=[(os.path.join(REPO_ROOT, "public"), "public")],
+    datas=[
+        (os.path.join(REPO_ROOT, "public"), "public"),
+        (os.path.join(REPO_ROOT, "USER_MANUAL.md"), "."),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
